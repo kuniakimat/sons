@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Your Tower of Life — S ON S</title>
+  <meta name="description" content="あなたの幸せは、何の上に成り立っていますか？">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Sans+JP:wght@300;400;500&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
+  <style>*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;background:#09090f;color:#f4f0e8}#root{min-height:100vh}</style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script>const {
+  useState,
+  useEffect,
+  useRef
+} = React;
+
+// ─────────────────────────────────────────
+// DATA — Phase 1: 基盤の問い（6問）
+// ─────────────────────────────────────────
+const LAYERS = [{
+  idx: 0,
+  kanji: "森",
+  nameJa: "地球・自然",
+  nameEn: "The Earth",
+  color: "#4e8055",
+  scenarioTag: "惑星比較",
+  question: "もし地球ではなく\n火星に生まれていたとしたら——\n今の幸せはどれくらい残っていますか？",
+  context: "酸素も水も食料もない惑星。現代技術をもってしても人間が生存できない環境です。",
+  choices: [{
+    label: "存在自体がない",
+    sub: "生命が成立しない環境",
+    score: 2
+  }, {
+    label: "わずかに残る程度",
+    sub: "生存がやっとで、今の幸せの5〜10%",
+    score: 8
+  }, {
+    label: "大きく損なわれる",
+    sub: "基本的な豊かさを失い、今の幸せの30%程度",
+    score: 30
+  }, {
+    label: "あまり変わらない",
+    sub: "環境適応力で、おおむね今と近い生活ができる",
+    score: 75
+  }]
+}, {
+  idx: 1,
+  kanji: "世",
+  nameJa: "文明・時代",
+  nameEn: "Civilization & Era",
+  color: "#5e7e48",
+  scenarioTag: "時代比較",
+  question: "もし現代ではなく\n石器時代に生まれていたとしたら——\n今の幸せはどれくらい残っていますか？",
+  context: "平均寿命30年、医療なし、電気なし、文字もない時代。今の生活を可能にしているものがすべてない状態です。",
+  choices: [{
+    label: "ほぼ残らない",
+    sub: "病気・飢え・暴力にさらされ、5%以下",
+    score: 4
+  }, {
+    label: "10%程度",
+    sub: "生存はできるが、今の幸せのほとんどが消える",
+    score: 10
+  }, {
+    label: "30〜40%程度",
+    sub: "自然の中での生活に意味を見出せる部分もある",
+    score: 35
+  }, {
+    label: "半分以上は残る",
+    sub: "人間の本質的な幸せは時代に左右されない",
+    score: 55
+  }]
+}, {
+  idx: 2,
+  kanji: "国",
+  nameJa: "国・社会",
+  nameEn: "Nation & Society",
+  color: "#806840",
+  scenarioTag: "国家比較",
+  question: "もし日本ではなく\n紛争地帯や最貧国に生まれていたとしたら——\n今の幸せはどれくらい残っていますか？",
+  context: "内戦、極度の貧困、教育機会ゼロ。国連HDI最下位グループの国々では、生活水準が日本の数分の一以下です。",
+  choices: [{
+    label: "ほぼ残らない",
+    sub: "安全も教育も機会もなく、10%以下になる",
+    score: 5
+  }, {
+    label: "20〜30%程度",
+    sub: "厳しい環境だが、精神的な豊かさは一部保てる",
+    score: 25
+  }, {
+    label: "50%程度",
+    sub: "環境は違っても、自分の力で半分は取り戻せる",
+    score: 50
+  }, {
+    label: "70%以上残る",
+    sub: "国の違いより個人の力の方が大きい",
+    score: 72
+  }]
+}, {
+  idx: 3,
+  kanji: "組",
+  nameJa: "組織・環境",
+  nameEn: "Organization",
+  color: "#885040",
+  scenarioTag: "組織比較",
+  question: "もし今の職場ではなく\nブラック企業で働き続けていたとしたら——\n今の幸せはどれくらい残っていますか？",
+  context: "残業200時間・パワハラ常態・成長機会ゼロの環境。才能が潰され、健康が蝕まれていく状況です。",
+  choices: [{
+    label: "ほぼ残らない",
+    sub: "精神・身体・キャリアすべてが壊れていた",
+    score: 5
+  }, {
+    label: "20〜30%程度",
+    sub: "私生活は守れても、日々の充実感は大きく失われる",
+    score: 25
+  }, {
+    label: "50%程度",
+    sub: "つらいが、仕事以外の部分で幸せを保てた",
+    score: 50
+  }, {
+    label: "70%以上残る",
+    sub: "職場環境より個人の内面の方が幸せを決める",
+    score: 72
+  }]
+}, {
+  idx: 4,
+  kanji: "村",
+  nameJa: "家族・共同体",
+  nameEn: "Family & Community",
+  color: "#664870",
+  scenarioTag: "家族比較",
+  question: "もし虐待家庭で育ち、\nあるいは孤児として育っていたとしたら——\n今の幸せはどれくらい残っていますか？",
+  context: "愛着形成の失敗、教育投資ゼロ、最初のネットワークなし。幼少期の環境は、その後のすべての選択に影を落とします。",
+  choices: [{
+    label: "ほぼ残らない",
+    sub: "自己肯定感・信頼・資本すべてが奪われていた",
+    score: 5
+  }, {
+    label: "20〜30%程度",
+    sub: "苦しい出発点だが、自力で一部は乗り越えられた",
+    score: 25
+  }, {
+    label: "50%程度",
+    sub: "逆境があっても、自分の力で半分の幸せは掴めた",
+    score: 50
+  }, {
+    label: "70%以上残る",
+    sub: "家族より自分自身の意志が人生を決める",
+    score: 72
+  }]
+}, {
+  idx: 5,
+  kanji: "我",
+  nameJa: "自分の力",
+  nameEn: "Your Own Effort",
+  color: "#3870a8",
+  scenarioTag: "自己評価",
+  question: "もし「努力しない自分」だったとしたら——\n今の幸せはどれくらい残っていますか？",
+  context: "同じ環境に生まれても、結果が違うのは自分の選択と努力があるから。あなた自身の純粋な貢献はどれくらいでしょうか。",
+  choices: [{
+    label: "ほぼ残らない",
+    sub: "自分の努力こそがすべての源",
+    score: 5
+  }, {
+    label: "30〜40%程度",
+    sub: "環境の恵みはあるが、努力なしでは大きく失われる",
+    score: 35
+  }, {
+    label: "60〜70%程度",
+    sub: "環境の力が大きく、努力の有無でそれほど変わらない",
+    score: 65
+  }, {
+    label: "80%以上残る",
+    sub: "恵まれた環境にいれば、努力しなくてもほぼ同じ幸せに至れた",
+    score: 82
+  }]
+}];
+
+// ─────────────────────────────────────────
+// DATA — Phase 2: 危機度の問い（6問）
+// ─────────────────────────────────────────
+const CRISIS_CHOICES = [{
+  label: "ほぼ安泰",
+  sub: "ピーク状態の90%以上が維持される",
+  score: 10
+}, {
+  label: "やや不安",
+  sub: "20〜30%程度が損なわれうる",
+  score: 25
+}, {
+  label: "かなり不安",
+  sub: "50〜60%程度が失われるリスクがある",
+  score: 55
+}, {
+  label: "深刻なリスクあり",
+  sub: "80%以上が損なわれる可能性がある",
+  score: 82
+}];
+const CRISIS_Qs = [{
+  layerIdx: 0,
+  kanji: "森",
+  nameJa: "地球・自然",
+  color: "#4e8055",
+  question: "地球環境は、今後20〜30年で\nどれくらい損なわれると思いますか？",
+  context: "参考視点：IPCCの最新報告では、現在の排出ペースが続けば2040年代に気温上昇1.5°Cを超える可能性が高い。生物種の絶滅速度は過去の大量絶滅期に匹敵するペースとも言われます。一方、再生可能エネルギーの普及も急速に進んでいます。"
+}, {
+  layerIdx: 1,
+  kanji: "世",
+  nameJa: "文明・時代",
+  color: "#5e7e48",
+  question: "現代文明の基盤（科学・民主主義・国際秩序）は、\n今後20〜30年でどれくらい損なわれると思いますか？",
+  context: "参考視点：AI・核兵器・生物兵器などの技術リスク、権威主義国家の台頭による民主主義の後退（Freedom Houseによると自由度は18年連続で低下）、地政学的分断の深まり。一方、国際協調の枠組みは依然として機能しています。"
+}, {
+  layerIdx: 2,
+  kanji: "国",
+  nameJa: "国・社会",
+  color: "#806840",
+  question: "日本という社会基盤は、\n今後20〜30年でどれくらい損なわれると思いますか？",
+  context: "参考視点：Gallup調査で日本の社員エンゲージメントは世界最下位水準（5%）。合計特殊出生率は1.2を割り込み、2050年には人口が1億人を下回る見通し。財政赤字はGDP比250%超。一方、技術力・治安・インフラの底堅さもあります。"
+}, {
+  layerIdx: 3,
+  kanji: "組",
+  nameJa: "組織・環境",
+  color: "#885040",
+  question: "あなたの今の組織・職場環境は、\n今後10〜20年でどれくらい損なわれるリスクがありますか？",
+  context: "参考視点：産業構造の変化・AI代替・人口減少による市場縮小など、多くの組織が構造的な転換期にあります。あなたの組織の状況を踏まえて直感で答えてください。"
+}, {
+  layerIdx: 4,
+  kanji: "村",
+  nameJa: "家族・共同体",
+  color: "#664870",
+  question: "あなたの家族・共同体との関係は、\n今後10〜20年でどれくらい損なわれるリスクがありますか？",
+  context: "参考視点：老い・別れ・子の独立・地域コミュニティの希薄化など、時間とともに関係性は変化します。孤独は健康リスクとして喫煙と同等とも言われます。あなたの状況を踏まえて直感で。"
+}, {
+  layerIdx: 5,
+  kanji: "我",
+  nameJa: "自分の力",
+  color: "#3870a8",
+  question: "あなた自身の力（健康・スキル・意欲）は、\n今後10〜20年でどれくらい損なわれるリスクがありますか？",
+  context: "参考視点：加齢による体力低下は避けられませんが、知識・経験・判断力は年齢とともに深まる側面もあります。スキルの陳腐化リスクと、自己投資による成長余地をあわせて考えてください。"
+}];
+
+// ─────────────────────────────────────────
+// CSS — inject immediately at module load
+// ─────────────────────────────────────────
+const CSS = `
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+.sos-root {
+  --bg:#09090f; --s1:#13131c; --s2:#1c1c28;
+  --bd:#28283c; --bd2:#3a3a52;
+  --t0:#f4f0e8; --t1:#d0cbbe; --t2:#9a9488; --t3:#52505e;
+  --gd:#c8a85c; --gb:#e2cc80; --gp:#f0e0b0; --gd2:#7a6430;
+  background:var(--bg); color:var(--t0);
+  font-family:'Noto Sans JP',sans-serif;
+  min-height:100vh; overflow-x:hidden; line-height:1.6;
+}
+/* SOS LOGO */
+.sos-logo-block {
+  font-family:'Cormorant Garamond',serif;
+  font-weight:300; text-transform:uppercase;
+  line-height:1.08; display:inline-block;
+}
+.sos-logo-block .row { display:flex; justify-content:space-between; }
+
+/* INTRO */
+.intro-wrap {
+  min-height:100vh; display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  text-align:center; padding:60px 32px;
+  position:relative; overflow:hidden;
+}
+.intro-bg-k {
+  position:absolute; font-family:'Shippori Mincho',serif; font-weight:700;
+  color:transparent; -webkit-text-stroke:1px rgba(200,168,92,.04);
+  user-select:none; pointer-events:none;
+  animation:bgdrift 38s ease-in-out infinite;
+}
+.intro-bg-k.rev { animation-direction:reverse; animation-duration:26s; }
+@keyframes bgdrift { 0%,100%{transform:scale(1) rotate(-2deg)} 50%{transform:scale(1.03) rotate(2deg)} }
+.intro-inner { position:relative; z-index:2; max-width:580px; }
+.intro-sos-hero { margin-bottom:28px; animation:fadeUp .7s ease .05s both; }
+.intro-tagline { font-size:11px; color:var(--t3); letter-spacing:.22em; margin-top:10px; text-transform:uppercase; }
+.intro-divider { width:40px; height:1px; background:var(--bd2); margin:28px auto; animation:fadeUp .7s ease .3s both; }
+.intro-title {
+  font-family:'Shippori Mincho',serif; font-weight:400;
+  font-size:clamp(20px,4vw,36px); line-height:1.55; margin-bottom:14px; color:var(--t0);
+  animation:fadeUp .7s ease .4s both;
+}
+.intro-sub { font-size:13px; color:var(--t1); line-height:2; margin-bottom:10px; animation:fadeUp .7s ease .55s both; }
+.intro-note {
+  font-size:11px; color:var(--t2); line-height:1.9;
+  border:1px solid var(--bd); padding:12px 16px; text-align:left;
+  animation:fadeUp .7s ease .65s both;
+}
+.intro-begin-hint {
+  margin-top:36px; font-size:11px; color:var(--t3); letter-spacing:.2em;
+  animation:fadeUp .7s ease .8s both; cursor:pointer;
+}
+.begin-arrow { display:block; margin:8px auto 0; animation:bounce 2s ease-in-out infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
+
+/* NAV */
+.qnav {
+  position:sticky; top:0; z-index:20;
+  background:rgba(9,9,15,.96); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--bd);
+  padding:13px 44px; display:flex; align-items:center; gap:18px;
+}
+@media(max-width:640px){ .qnav{padding:13px 18px;} }
+.qnav-logo { font-family:'Shippori Mincho',serif; font-size:11px; color:var(--gd); letter-spacing:.18em; white-space:nowrap; }
+.qnav-track { flex:1; height:1px; background:var(--bd2); position:relative; }
+.qnav-fill { position:absolute; top:0; left:0; height:100%; background:var(--gd); transition:width .5s ease; }
+.qnav-phase { font-size:9px; letter-spacing:.2em; color:var(--gd); border:1px solid var(--gd2); padding:2px 8px; white-space:nowrap; }
+.qnav-back { background:none; border:none; color:var(--t3); font-size:18px; cursor:pointer; padding:0 4px; line-height:1; transition:color .15s; flex-shrink:0; }
+.qnav-back:hover { color:var(--t1); }
+.btn-back {
+  display:inline-block;
+  background:transparent; border:none;
+  color:var(--t3); font-size:11px; padding:4px 0;
+  cursor:pointer; letter-spacing:.1em; transition:color .2s;
+  text-decoration:underline; text-underline-offset:3px;
+}
+.btn-back:hover { color:var(--t1); }
+.q-back-row {
+  display:flex; justify-content:flex-end;
+  padding:0 44px; margin-top:-32px; margin-bottom:8px;
+}
+@media(max-width:640px){ .q-back-row{padding:0 18px;} }
+
+/* QUESTION */
+.q-wrap { max-width:700px; margin:0 auto; padding:52px 44px; animation:fadeUp .35s ease both; }
+@media(max-width:640px){ .q-wrap{padding:30px 18px;} }
+.q-scenario-tag {
+  display:inline-block; font-size:10px; letter-spacing:.2em;
+  color:var(--gd); border:1px solid var(--gd2); padding:2px 10px; margin-bottom:16px;
+}
+.q-head { display:flex; align-items:flex-start; gap:16px; margin-bottom:18px; }
+.q-kanji { font-family:'Shippori Mincho',serif; font-size:52px; font-weight:700; line-height:1; flex-shrink:0; }
+.q-meta { padding-top:6px; }
+.q-meta-ja { font-size:14px; color:var(--t1); letter-spacing:.1em; }
+.q-meta-en { font-size:10px; color:var(--t2); letter-spacing:.2em; text-transform:uppercase; margin-top:2px; }
+.q-text {
+  font-family:'Shippori Mincho',serif; font-weight:400;
+  font-size:clamp(16px,2.6vw,22px); line-height:1.75; margin-bottom:10px;
+  color:var(--t0); white-space:pre-line;
+}
+.q-context {
+  font-size:13px; color:var(--t1); line-height:1.95;
+  padding-left:14px; border-left:2px solid var(--bd2); margin-bottom:32px;
+}
+.q-choices { display:flex; flex-direction:column; gap:10px; }
+.q-choice {
+  display:flex; align-items:flex-start; gap:16px; padding:16px 20px;
+  background:var(--s1); border:1px solid var(--bd);
+  cursor:pointer; transition:border-color .15s, background .15s;
+  position:relative; overflow:hidden;
+}
+.q-choice:hover { border-color:var(--bd2); background:var(--s2); }
+.q-choice.sel { border-color:var(--gd); background:var(--s2); }
+.q-choice.sel::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(200,168,92,.1) 0%,transparent 60%);
+  pointer-events:none;
+}
+.choice-alpha {
+  font-family:'Cormorant Garamond',serif; font-size:17px; font-weight:600;
+  color:var(--gd2); flex-shrink:0; width:18px;
+  transition:color .15s; position:relative; z-index:1; margin-top:1px;
+}
+.q-choice.sel .choice-alpha { color:var(--gd); }
+.choice-body { position:relative; z-index:1; }
+.choice-main { font-size:14px; color:var(--t0); line-height:1.45; margin-bottom:3px; }
+.choice-sub { font-size:12px; color:var(--t2); line-height:1.6; }
+
+/* RESULT */
+.result-wrap { max-width:900px; margin:0 auto; padding:52px 44px 80px; }
+@media(max-width:640px){ .result-wrap{padding:30px 18px 60px;} }
+.res-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+.res-tagline-small { font-size:10px; color:var(--t3); letter-spacing:.2em; text-transform:uppercase; }
+.res-reveal-title {
+  font-family:'Shippori Mincho',serif; font-weight:400;
+  font-size:clamp(17px,2.8vw,26px); line-height:1.55; margin-bottom:40px; color:var(--t0);
+}
+
+/* reveal button */
+.reveal-btn-wrap { text-align:center; padding:48px 0; }
+.reveal-btn {
+  display:inline-block; background:transparent;
+  border:1px solid var(--gd); color:var(--gd);
+  font-family:'Shippori Mincho',serif; font-size:15px;
+  padding:16px 56px; cursor:pointer; letter-spacing:.15em;
+  transition:all .25s; position:relative; overflow:hidden;
+}
+.reveal-btn::before {
+  content:''; position:absolute; inset:0;
+  background:var(--gd); opacity:0; transition:opacity .25s;
+}
+.reveal-btn:hover::before { opacity:.12; }
+.reveal-btn-sub { margin-top:12px; font-size:11px; color:var(--t3); letter-spacing:.15em; }
+
+/* reveal sections */
+.reveal-section { opacity:0; transform:translateY(20px); transition:opacity .7s ease, transform .7s ease; }
+.reveal-section.shown { opacity:1; transform:translateY(0); }
+
+/* Tower */
+.tower-section {
+  display:grid; grid-template-columns:1fr 200px; gap:32px; align-items:start;
+  margin-bottom:48px;
+}
+@media(max-width:660px){ .tower-section{grid-template-columns:1fr;} }
+.tower-svg-wrap { position:relative; margin:0 -44px; }
+.tower-svg-wrap svg { width:100%; display:block; }
+.tower-tap-hint {
+  text-align:center; font-size:10px; color:var(--t3);
+  letter-spacing:.1em; margin-top:6px; cursor:pointer;
+}
+.tower-modal-overlay {
+  position:fixed; inset:0; background:rgba(9,9,15,0.97);
+  z-index:9999; display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  animation:fadeIn .2s ease;
+}
+.tower-modal-overlay svg { width:100%; max-height:90vh; object-fit:contain; }
+.tower-modal-close {
+  position:fixed; top:16px; right:20px;
+  background:none; border:none; color:var(--t2);
+  font-size:28px; cursor:pointer; z-index:10000;
+  padding:8px; line-height:1;
+}
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.tower-caption { margin-top:10px; text-align:right; }
+.tower-tooltip {
+  position:absolute; background:var(--s2); border:1px solid var(--bd2);
+  padding:10px 14px; font-size:11px; color:var(--t1);
+  pointer-events:none; z-index:10; max-width:170px; line-height:1.7;
+  box-shadow:0 4px 20px rgba(0,0,0,.5);
+}
+.legend-wrap { padding-top:2px; }
+.legend-title { font-size:9px; letter-spacing:.2em; color:var(--t3); text-transform:uppercase; margin-bottom:12px; }
+.legend-rows { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+.legend-row { display:flex; align-items:center; gap:7px; }
+.legend-swatch { width:8px; height:8px; border-radius:1px; flex-shrink:0; }
+.legend-kanji { font-family:'Shippori Mincho',serif; font-size:13px; font-weight:700; flex-shrink:0; }
+.legend-name { font-size:11px; color:var(--t1); flex:1; min-width:0; }
+.legend-pct { font-family:'Cormorant Garamond',serif; font-size:13px; color:var(--t0); flex-shrink:0; }
+.legend-crisis { font-size:10px; padding:1px 5px; border-radius:2px; flex-shrink:0; font-family:'Cormorant Garamond',serif; }
+.legend-crisis.high { color:#c04030; background:rgba(192,64,48,.1); border:1px solid rgba(192,64,48,.2); }
+.legend-crisis.mid  { color:#c08030; background:rgba(192,128,48,.08); border:1px solid rgba(192,128,48,.15); }
+.legend-crisis.low  { color:var(--t2); background:var(--bd); border:1px solid var(--bd2); }
+.crack-legend-title { font-size:9px; letter-spacing:.15em; color:var(--t3); text-transform:uppercase; margin-bottom:7px; }
+.crack-row { display:flex; align-items:center; gap:7px; font-size:10px; color:var(--t2); margin-bottom:5px; }
+.crack-swatch { flex-shrink:0; display:flex; gap:2px; align-items:center; }
+
+/* Section head */
+.section-head { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+.section-head-label { font-size:10px; letter-spacing:.28em; color:var(--t2); text-transform:uppercase; white-space:nowrap; }
+.section-head::after { content:''; flex:1; height:1px; background:var(--bd); }
+
+/* Ranking */
+.ranking-section { margin-bottom:48px; }
+.ranking-note {
+  font-size:12px; color:var(--t1); line-height:1.85;
+  padding:12px 16px; background:var(--s1); border-left:2px solid var(--bd2); margin-bottom:16px;
+}
+.ranking-note strong { color:var(--t0); }
+.rank-header {
+  display:grid; grid-template-columns:26px 56px 1fr 50px;
+  gap:12px; padding:0 16px 8px;
+  border-bottom:1px solid var(--bd); margin-bottom:8px;
+}
+.rank-header-cell { font-size:9px; color:var(--t3); letter-spacing:.15em; }
+.rank-table { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+.rank-row {
+  display:grid; grid-template-columns:26px 56px 1fr 50px;
+  align-items:center; gap:12px; padding:13px 16px;
+  background:var(--s1); border:1px solid var(--bd);
+}
+.rank-row.rk1 { border-color:var(--gd2); background:var(--s2); }
+@media(max-width:480px){
+  .rank-header,.rank-row { grid-template-columns:22px 46px 1fr 42px; gap:8px; padding:11px 12px; }
+}
+.rk-num { font-family:'Cormorant Garamond',serif; font-size:17px; color:var(--t3); text-align:center; }
+.rk1 .rk-num { color:var(--gd); }
+.rk2 .rk-num,.rk3 .rk-num { color:var(--t2); }
+.rk-layer { display:flex; flex-direction:column; align-items:center; gap:2px; }
+.rk-kanji { font-family:'Shippori Mincho',serif; font-size:20px; font-weight:700; }
+.rk-name { font-size:9px; color:var(--t2); text-align:center; line-height:1.3; }
+.rk-bar-wrap { height:4px; background:var(--bd2); border-radius:2px; overflow:hidden; margin-bottom:5px; }
+.rk-bar-fill { height:100%; border-radius:2px; transition:width 1.2s cubic-bezier(.4,0,.2,1); }
+.rk-detail { display:flex; gap:8px; font-size:10px; color:var(--t2); flex-wrap:wrap; }
+.rk-detail b { color:var(--t1); font-weight:400; }
+.rk-score { font-family:'Cormorant Garamond',serif; font-size:21px; text-align:right; color:var(--t0); }
+.rk1 .rk-score { color:var(--gb); }
+
+.winner-box {
+  padding:22px 26px; background:var(--s2); border:1px solid var(--gd2); position:relative; overflow:hidden;
+}
+.winner-box::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,var(--gd),transparent);
+}
+.winner-label { font-size:9px; letter-spacing:.25em; color:var(--gd); text-transform:uppercase; margin-bottom:8px; }
+.winner-title { font-family:'Shippori Mincho',serif; font-size:clamp(15px,2.5vw,20px); line-height:1.5; margin-bottom:10px; color:var(--t0); }
+.winner-desc { font-size:13px; color:var(--t1); line-height:1.95; }
+
+/* Message */
+.message-section {}
+.res-msg {
+  padding:26px 30px; background:var(--s1); border-left:2px solid var(--gd);
+  font-family:'Shippori Mincho',serif; font-size:14px; line-height:2.1; color:var(--t1); margin-bottom:24px;
+}
+.res-msg strong { color:var(--t0); }
+.res-msg em { color:var(--gd); font-style:normal; }
+.proverb-final { text-align:center; padding:24px; border:1px solid var(--bd); margin-bottom:24px; }
+.pf-east { font-family:'Shippori Mincho',serif; font-size:17px; letter-spacing:.4em; color:var(--gd); margin-bottom:4px; }
+.pf-east-sub { font-size:11px; color:var(--t2); margin-bottom:12px; }
+.pf-sep { width:18px; height:1px; background:var(--bd2); margin:10px auto; }
+.pf-west { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:13px; color:var(--t1); line-height:1.7; }
+.pf-attr { font-size:10px; color:var(--t3); font-style:normal; margin-top:4px; }
+.btn-restart {
+  display:block; margin:0 auto;
+  background:transparent; border:1px solid var(--bd2);
+  color:var(--t1); font-size:12px; padding:12px 36px;
+  cursor:pointer; letter-spacing:.12em; transition:all .2s;
+}
+.btn-restart:hover { border-color:var(--gd); color:var(--gd); }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+`;
+
+// Inject CSS immediately at module load (not waiting for useEffect)
+if (typeof document !== 'undefined') {
+  const _id = "sons-style-v4";
+  if (!document.getElementById(_id)) {
+    const _el = document.createElement("style");
+    _el.id = _id;
+    _el.textContent = CSS;
+    document.head.appendChild(_el);
+  }
+}
+
+// ─────────────────────────────────────────
+// SOS LOGO
+// ─────────────────────────────────────────
+function SosLogo({
+  size = 14,
+  color = "var(--gp)",
+  dimTop = true
+}) {
+  const chars1 = "SUCCESS  ON".split("");
+  const chars2 = "SUCCESSION".split("");
+  return /*#__PURE__*/React.createElement("div", {
+    className: "sos-logo-block",
+    style: {
+      fontSize: size,
+      color
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      opacity: dimTop ? 0.52 : 1
+    }
+  }, chars1.map((ch, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    style: {
+      display: "inline-block",
+      minWidth: ch === " " ? "0.32em" : "auto"
+    }
+  }, ch))), /*#__PURE__*/React.createElement("div", {
+    className: "row"
+  }, chars2.map((ch, i) => /*#__PURE__*/React.createElement("span", {
+    key: i
+  }, ch))));
+}
+
+// ─────────────────────────────────────────
+// CHAMFERED BLOCK PATH
+// top-left/top-right corners angled where block meets next layer above
+// chamfer = diagonal cut at transition corners
+// ─────────────────────────────────────────
+function chamferPath(x0, bw, y0, bh, nextBw, cx, isTop) {
+  const x1 = x0 + bw;
+  const ch = 10; // chamfer size px
+
+  if (isTop) {
+    // Top block: flat top (no chamfer needed above)
+    return `M${x0},${y0 + bh} L${x1},${y0 + bh} L${x1},${y0} L${x0},${y0} Z`;
+  }
+
+  // Inner corners where this block overhangs the block above
+  // Left inner corner: x0 + (bw-nextBw)/2, y0  → chamfer diagonally inward
+  const insetL = cx - nextBw / 2; // left edge of block above
+  const insetR = cx + nextBw / 2; // right edge of block above
+
+  // Chamfer the top-inner corners (where step transition occurs)
+  return [`M${x0},${y0 + bh}`,
+  // bottom-left
+  `L${x1},${y0 + bh}`,
+  // bottom-right
+  `L${x1},${y0 + ch}`,
+  // right side up
+  `L${insetR + ch},${y0}`,
+  // chamfer top-right inner
+  `L${insetL - ch},${y0}`,
+  // top edge (inner span)
+  `L${x0},${y0 + ch}`,
+  // chamfer top-left inner
+  `Z`].join(' ');
+}
+
+// ─────────────────────────────────────────
+// EROSION PATH — bottom of block eroded based on crisis
+// ─────────────────────────────────────────
+function erosionPath(x0, bw, y1, bh, crisis) {
+  const x1 = x0 + bw;
+  if (crisis <= 34) {
+    const d = bh * 0.25;
+    const steps = 6;
+    const sw = bw / steps;
+    let d_str = `M${x0},${y1}`;
+    for (let i = 0; i < steps; i++) {
+      const cx1 = x0 + sw * i + sw * 0.25;
+      const cx2 = x0 + sw * i + sw * 0.75;
+      const ex = x0 + sw * (i + 1);
+      const dip = i % 2 === 0 ? d : d * 0.5;
+      d_str += ` C${cx1},${y1 - dip} ${cx2},${y1 - dip} ${ex},${y1}`;
+    }
+    return {
+      bottomPath: d_str,
+      shadowDepth: d
+    };
+  } else if (crisis <= 64) {
+    const d = bh * 0.50;
+    const steps = 14;
+    const sw = bw / steps;
+    const pts = [[x0, y1]];
+    for (let i = 0; i < steps; i++) {
+      const x = x0 + sw * (i + 1);
+      const dip = i % 2 === 0 ? y1 - d * (0.7 + Math.sin(i) * 0.3) : y1 - d * 0.15;
+      pts.push([x, dip]);
+    }
+    pts.push([x1, y1]);
+    return {
+      bottomPath: pts.map((p, i) => i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`).join(' '),
+      shadowDepth: d
+    };
+  } else {
+    const d = bh * 0.72;
+    const steps = 18;
+    const sw = bw / steps;
+    const pts = [[x0, y1]];
+    for (let i = 0; i < steps; i++) {
+      const x = x0 + sw * (i + 1);
+      const phase = i / steps;
+      const dip = i % 2 === 0 ? y1 - d * (0.6 + Math.sin(i * 1.7) * 0.35 + phase * 0.1) : y1 - d * (0.05 + Math.cos(i * 1.3) * 0.08);
+      pts.push([x, dip]);
+    }
+    pts.push([x1, y1]);
+    return {
+      bottomPath: pts.map((p, i) => i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`).join(' '),
+      shadowDepth: d
+    };
+  }
+}
+
+// ─────────────────────────────────────────
+// TOWER SVG — chamfered steps + erosion + circulation
+// ─────────────────────────────────────────
+function TowerSVG({
+  contribPcts,
+  crisisScores,
+  onHover,
+  onLeave,
+  topLayerIdx = null,
+  customLayer = null,
+  customPct = null
+}) {
+  const W = 520,
+    H = 440,
+    cx = W / 2,
+    floorY = H - 36,
+    totalH = 230,
+    minH = 22;
+  let y = floorY;
+  const blocks = LAYERS.map((L, i) => {
+    const bh = Math.max(minH, contribPcts[i] / 100 * totalH);
+    const bw = 380 - i * 38;
+    const x0 = cx - bw / 2;
+    const block = {
+      L,
+      i,
+      x0,
+      bw,
+      y0: y - bh,
+      y1: y,
+      bh,
+      crisis: crisisScores[i]
+    };
+    y -= bh;
+    return block;
+  });
+
+  // Custom layer — inserted between 村(idx4) and 我(idx5)
+  let customBlock = null;
+  if (customLayer?.name && customLayer.score !== null && customPct != null) {
+    // 高さを他層と同じスケールで計算（customPct/100 * totalH）
+    const bh = Math.max(minH, customPct / 100 * totalH);
+    const bw = Math.round((blocks[4].bw + blocks[5].bw) / 2);
+    const x0 = cx - bw / 2;
+    const origWaY1 = blocks[5].y1;
+    const origWaH = blocks[5].bh;
+    customBlock = {
+      name: customLayer.name,
+      color: "#a07850",
+      x0,
+      bw,
+      y1: origWaY1,
+      y0: origWaY1 - bh,
+      bh,
+      crisis: customLayer.crisisScore || 25,
+      isCustom: true
+    };
+    blocks[5] = {
+      ...blocks[5],
+      y1: customBlock.y0,
+      y0: customBlock.y0 - origWaH
+    };
+  }
+  const personY = Math.max(50, blocks[5].y0 - 2);
+  const showArcs = topLayerIdx !== null;
+
+  // Determine top block for arcs
+  const arcTopBlock = showArcs && topLayerIdx === 99 && customBlock ? customBlock : showArcs ? blocks[topLayerIdx] : blocks[2];
+  const topBMidY = (arcTopBlock.y0 + arcTopBlock.y1) / 2;
+  return /*#__PURE__*/React.createElement("svg", {
+    viewBox: `0 0 ${W} ${H}`,
+    xmlns: "http://www.w3.org/2000/svg"
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: 16,
+    y1: floorY,
+    x2: W - 80,
+    y2: floorY,
+    stroke: "rgba(255,255,255,0.06)",
+    strokeWidth: 1
+  }), blocks.map((b, bi) => {
+    const nextBlock = blocks[bi + 1];
+    const {
+      bottomPath,
+      shadowDepth
+    } = erosionPath(b.x0, b.bw, b.y1, b.bh, b.crisis);
+    const shadowY = b.y1 - shadowDepth;
+    const isTopBlock = bi === blocks.length - 1;
+    const ch = 10;
+    const insetL = nextBlock ? cx - nextBlock.bw / 2 : b.x0;
+    const insetR = nextBlock ? cx + nextBlock.bw / 2 : b.x0 + b.bw;
+    const clipId = `clip4-${b.i}`;
+    const fullBlockPath = isTopBlock ? `M${b.x0},${b.y1} L${b.x0 + b.bw},${b.y1} L${b.x0 + b.bw},${b.y0} L${b.x0},${b.y0} Z` : `M${b.x0},${b.y1} L${b.x0 + b.bw},${b.y1} L${b.x0 + b.bw},${b.y0 + ch} L${insetR + ch},${b.y0} L${insetL - ch},${b.y0} L${b.x0},${b.y0 + ch} Z`;
+    const topPath = isTopBlock ? `M${b.x0},${b.y0} L${b.x0 + b.bw},${b.y0}` : `M${b.x0},${b.y0 + ch} L${insetL - ch},${b.y0} L${insetR + ch},${b.y0} L${b.x0 + b.bw},${b.y0 + ch}`;
+    const isTopLayer = b.i === topLayerIdx;
+    return /*#__PURE__*/React.createElement("g", {
+      key: b.i,
+      onMouseEnter: e => onHover(e, b.i),
+      onMouseLeave: onLeave,
+      style: {
+        cursor: "pointer"
+      }
+    }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("clipPath", {
+      id: clipId
+    }, /*#__PURE__*/React.createElement("path", {
+      d: fullBlockPath
+    }))), /*#__PURE__*/React.createElement("rect", {
+      x: b.x0,
+      y: shadowY,
+      width: b.bw,
+      height: shadowDepth,
+      fill: "rgba(0,0,0,0.65)",
+      clipPath: `url(#${clipId})`
+    }), /*#__PURE__*/React.createElement("path", {
+      d: fullBlockPath,
+      fill: b.L.color,
+      fillOpacity: 0.85
+    }), /*#__PURE__*/React.createElement("path", {
+      d: bottomPath + ` L${b.x0 + b.bw},${b.y1} L${b.x0},${b.y1} Z`,
+      fill: "#09090f",
+      clipPath: `url(#${clipId})`
+    }), isTopBlock ? /*#__PURE__*/React.createElement("line", {
+      x1: b.x0,
+      y1: b.y0,
+      x2: b.x0 + b.bw,
+      y2: b.y0,
+      stroke: b.L.color,
+      strokeOpacity: 0.75,
+      strokeWidth: 1.5
+    }) : /*#__PURE__*/React.createElement("path", {
+      d: topPath,
+      fill: "none",
+      stroke: b.L.color,
+      strokeOpacity: 0.7,
+      strokeWidth: 1.5
+    }), !isTopBlock && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
+      d: `M${b.x0},${b.y0 + ch} L${insetL - ch},${b.y0}`,
+      stroke: "rgba(0,0,0,0.25)",
+      strokeWidth: 1,
+      fill: "none"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: `M${b.x0 + b.bw},${b.y0 + ch} L${insetR + ch},${b.y0}`,
+      stroke: "rgba(0,0,0,0.25)",
+      strokeWidth: 1,
+      fill: "none"
+    })), /*#__PURE__*/React.createElement("path", {
+      d: bottomPath,
+      fill: "none",
+      stroke: "rgba(0,0,0,0.45)",
+      strokeWidth: 1.5
+    }), isTopLayer && /*#__PURE__*/React.createElement("path", {
+      d: fullBlockPath,
+      fill: "none",
+      stroke: "rgba(80,140,220,0.45)",
+      strokeWidth: 1.5,
+      strokeDasharray: "4,3"
+    }), (() => {
+      const labelY = b.y0 + Math.max(b.bh * 0.38, 14);
+      const rawPct = contribPcts ? contribPcts[b.i] : undefined;
+      const pct = typeof rawPct === 'number' && !isNaN(rawPct) ? rawPct : null;
+      return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("text", {
+        x: b.x0 + 12,
+        y: labelY,
+        fontFamily: "'Shippori Mincho',serif",
+        fontSize: 16,
+        fontWeight: 700,
+        fill: "rgba(255,255,255,0.75)"
+      }, b.L.kanji), b.bw > 100 && /*#__PURE__*/React.createElement("text", {
+        x: b.x0 + 34,
+        y: labelY,
+        fontFamily: "'Noto Sans JP',sans-serif",
+        fontSize: 11,
+        fill: "rgba(255,255,255,0.45)",
+        dominantBaseline: "middle",
+        dy: "1"
+      }, b.L.nameJa), pct !== null && /*#__PURE__*/React.createElement("text", {
+        x: b.x0 + b.bw - 10,
+        y: labelY,
+        fontFamily: "'Cormorant Garamond',serif",
+        fontSize: 15,
+        fill: "rgba(255,255,255,0.65)",
+        textAnchor: "end"
+      }, pct.toFixed(0), "%"));
+    })());
+  }), customBlock && (() => {
+    const cb = customBlock;
+    const {
+      bottomPath
+    } = erosionPath(cb.x0, cb.bw, cb.y1, cb.bh, cb.crisis);
+    const clipId = "clip-custom";
+    const fullPath = `M${cb.x0},${cb.y1} L${cb.x0 + cb.bw},${cb.y1} L${cb.x0 + cb.bw},${cb.y0} L${cb.x0},${cb.y0} Z`;
+    const labelY = cb.y0 + Math.max(cb.bh * 0.55, 12);
+    return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("clipPath", {
+      id: clipId
+    }, /*#__PURE__*/React.createElement("path", {
+      d: fullPath
+    }))), /*#__PURE__*/React.createElement("rect", {
+      x: cb.x0,
+      y: cb.y1 - cb.bh * 0.3,
+      width: cb.bw,
+      height: cb.bh * 0.3,
+      fill: "rgba(0,0,0,0.5)",
+      clipPath: `url(#${clipId})`
+    }), /*#__PURE__*/React.createElement("path", {
+      d: fullPath,
+      fill: cb.color,
+      fillOpacity: 0.82
+    }), /*#__PURE__*/React.createElement("path", {
+      d: bottomPath + ` L${cb.x0 + cb.bw},${cb.y1} L${cb.x0},${cb.y1} Z`,
+      fill: "#09090f",
+      clipPath: `url(#${clipId})`
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: cb.x0,
+      y1: cb.y0,
+      x2: cb.x0 + cb.bw,
+      y2: cb.y0,
+      stroke: cb.color,
+      strokeOpacity: 0.7,
+      strokeWidth: 1.5
+    }), /*#__PURE__*/React.createElement("path", {
+      d: bottomPath,
+      fill: "none",
+      stroke: "rgba(0,0,0,0.4)",
+      strokeWidth: 1.2
+    }), /*#__PURE__*/React.createElement("text", {
+      x: cb.x0 + 10,
+      y: labelY,
+      fontFamily: "'Shippori Mincho',serif",
+      fontSize: 14,
+      fontWeight: 700,
+      fill: "rgba(255,255,255,0.7)"
+    }, "\uFF0B"), /*#__PURE__*/React.createElement("text", {
+      x: cb.x0 + 26,
+      y: labelY,
+      fontFamily: "'Noto Sans JP',sans-serif",
+      fontSize: 11,
+      fill: "rgba(255,255,255,0.55)"
+    }, cb.name), customPct != null && /*#__PURE__*/React.createElement("text", {
+      x: cb.x0 + cb.bw - 10,
+      y: labelY,
+      fontFamily: "'Cormorant Garamond',serif",
+      fontSize: 15,
+      fill: "rgba(255,255,255,0.65)",
+      textAnchor: "end"
+    }, customPct.toFixed(0), "%"));
+  })(), /*#__PURE__*/React.createElement("g", {
+    transform: `translate(${cx},${personY})`
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: 0,
+    cy: -27,
+    r: 7,
+    fill: "rgba(244,240,232,0.92)"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: 0,
+    y1: -20,
+    x2: 0,
+    y2: 0,
+    stroke: "rgba(244,240,232,0.92)",
+    strokeWidth: 2.5,
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: -11,
+    y1: -13,
+    x2: 11,
+    y2: -13,
+    stroke: "rgba(244,240,232,0.92)",
+    strokeWidth: 2.2,
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: 0,
+    y1: 0,
+    x2: -8,
+    y2: 14,
+    stroke: "rgba(244,240,232,0.92)",
+    strokeWidth: 2.2,
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: 0,
+    y1: 0,
+    x2: 8,
+    y2: 14,
+    stroke: "rgba(244,240,232,0.92)",
+    strokeWidth: 2.2,
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: 14,
+    y: -22,
+    fontFamily: "'Shippori Mincho',serif",
+    fontSize: 10,
+    fontWeight: 700,
+    fill: "rgba(244,240,232,0.65)"
+  }, "\u6211")), showArcs && /*#__PURE__*/React.createElement(React.Fragment, null, blocks.slice(0, 5).map((b, bi) => {
+    const midY = (b.y0 + b.y1) / 2;
+    const rightX = b.x0 + b.bw;
+    const arcX = W - 10 - bi * 5;
+    return /*#__PURE__*/React.createElement("g", {
+      key: `on-${b.i}`
+    }, /*#__PURE__*/React.createElement("path", {
+      d: `M${rightX + 4},${midY} C${arcX},${midY} ${arcX},${personY - 20} ${cx + 10},${personY - 24}`,
+      fill: "none",
+      stroke: "rgba(210,75,55,0.3)",
+      strokeWidth: 1.0,
+      strokeLinecap: "round"
+    }));
+  }), /*#__PURE__*/React.createElement("polygon", {
+    points: `${cx + 6},${personY - 28} ${cx + 18},${personY - 20} ${cx + 6},${personY - 16}`,
+    fill: "rgba(210,75,55,0.55)"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: W - 4,
+    y: Math.round((blocks[1].y1 + personY) / 2),
+    fontFamily: "'Shippori Mincho',serif",
+    fontSize: 14,
+    fontWeight: 700,
+    fill: "rgba(210,75,55,0.6)",
+    textAnchor: "end",
+    dominantBaseline: "middle"
+  }, "\u6069"), blocks.slice(0, 5).map((b, bi) => {
+    const isTop = b.i === topLayerIdx;
+    const midY = (b.y0 + b.y1) / 2;
+    const sw = isTop ? 2.8 : 0.8;
+    const opacity = isTop ? 0.7 : 0.18;
+    const arcX = -10 - bi * 5;
+    return /*#__PURE__*/React.createElement("g", {
+      key: `ons-${b.i}`
+    }, /*#__PURE__*/React.createElement("path", {
+      d: `M${cx - 10},${personY - 20} C${arcX},${personY - 20} ${arcX},${midY} ${b.x0 - 4},${midY}`,
+      fill: "none",
+      stroke: `rgba(70,130,210,${opacity})`,
+      strokeWidth: sw,
+      strokeLinecap: "round"
+    }), isTop && /*#__PURE__*/React.createElement("polygon", {
+      points: `${b.x0},${midY - 7} ${b.x0},${midY + 7} ${b.x0 + 14},${midY}`,
+      fill: "rgba(70,130,210,0.75)"
+    }));
+  }), topLayerIdx === 99 && customBlock && (() => {
+    const midY = (customBlock.y0 + customBlock.y1) / 2;
+    return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
+      d: `M${cx - 10},${personY - 20} C${-40},${personY - 20} ${-40},${midY} ${customBlock.x0 - 4},${midY}`,
+      fill: "none",
+      stroke: "rgba(70,130,210,0.7)",
+      strokeWidth: 2.8,
+      strokeLinecap: "round"
+    }), /*#__PURE__*/React.createElement("polygon", {
+      points: `${customBlock.x0},${midY - 7} ${customBlock.x0},${midY + 7} ${customBlock.x0 + 14},${midY}`,
+      fill: "rgba(70,130,210,0.75)"
+    }));
+  })(), /*#__PURE__*/React.createElement("text", {
+    x: 6,
+    y: Math.round((personY + topBMidY) / 2) - 10,
+    fontFamily: "'Shippori Mincho',serif",
+    fontSize: 10,
+    fontWeight: 700,
+    fill: "rgba(70,130,210,0.65)",
+    textAnchor: "start"
+  }, "\u6069\u8FD4\u3057")));
+}
+
+// ─────────────────────────────────────────
+// COMPUTE — 全層を統一スケールで正規化
+// 我も含めた全層で100%に正規化。タワーの高さ＝寄与度%
+// ─────────────────────────────────────────
+function compute(onAnswers, crisisAnswers, customLayer = null) {
+  const contribs = onAnswers.map(s => 100 - s); // 6要素（森〜我）
+  const customContribRaw = customLayer?.name && customLayer.score != null ? 100 - customLayer.score : 0;
+
+  // 全層合計で正規化
+  const total = contribs.reduce((a, b) => a + b, 0) + customContribRaw || 1;
+  const allPcts = contribs.map(v => v / total * 100);
+  const customPct = customContribRaw > 0 ? customContribRaw / total * 100 : null;
+
+  // contribPcts: タワー表示用6要素（我含む、合計は customPctを加えると100%）
+  const contribPcts = allPcts;
+  const externalPcts = allPcts.slice(0, 5); // 森〜村（5層）
+  const selfContribRaw = allPcts[5]; // 我の正規化済み%
+
+  // 外部依存度 = 我以外の合計%
+  const externalDependency = Math.round(externalPcts.reduce((a, b) => a + b, 0) + (customPct || 0));
+  const crisisScores = LAYERS.map((_, i) => crisisAnswers[i] || 10);
+
+  // 優先度 = 外部5層（我は除外）× 危機度
+  const priorities = externalPcts.map((p, i) => p * crisisScores[i] / 100);
+  const customPriority = customPct != null ? customPct * (customLayer.crisisScore || 25) / 100 : null;
+  const customContrib = customPct;
+  const ranked = priorities.map((p, i) => ({
+    p,
+    i,
+    isCustom: false
+  })).sort((a, b) => b.p - a.p);
+  if (customPriority != null) {
+    ranked.push({
+      p: customPriority,
+      i: 99,
+      isCustom: true
+    });
+    ranked.sort((a, b) => b.p - a.p);
+  }
+  return {
+    contribPcts,
+    externalPcts,
+    selfContribRaw,
+    externalDependency,
+    crisisScores,
+    priorities,
+    ranked,
+    maxP: Math.max(...ranked.map(r => r.p), 1),
+    customContrib,
+    customPriority,
+    customPct
+  };
+}
+
+// ─────────────────────────────────────────
+// CHOICE ITEM
+// ─────────────────────────────────────────
+function ChoiceItem({
+  c,
+  ci,
+  onSelect
+}) {
+  const [sel, setSel] = useState(false);
+  function click() {
+    if (sel) return;
+    setSel(true);
+    setTimeout(() => {
+      setSel(false);
+      onSelect();
+    }, 360);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: `q-choice${sel ? " sel" : ""}`,
+    onClick: click
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "choice-alpha"
+  }, String.fromCharCode(65 + ci)), /*#__PURE__*/React.createElement("div", {
+    className: "choice-body"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "choice-main"
+  }, c.label), /*#__PURE__*/React.createElement("div", {
+    className: "choice-sub"
+  }, c.sub)));
+}
+
+// ─────────────────────────────────────────
+// QUESTION CARD
+// ─────────────────────────────────────────
+function QuestionCard({
+  layer: L,
+  onSelect,
+  onBack
+}) {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, onBack && /*#__PURE__*/React.createElement("div", {
+    className: "q-back-row"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-back",
+    onClick: onBack
+  }, "\u2190 \u623B\u308B")), /*#__PURE__*/React.createElement("div", {
+    className: "q-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "q-scenario-tag"
+  }, L.scenarioTag), /*#__PURE__*/React.createElement("div", {
+    className: "q-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "q-kanji",
+    style: {
+      color: L.color
+    }
+  }, L.kanji), /*#__PURE__*/React.createElement("div", {
+    className: "q-meta"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "q-meta-ja"
+  }, L.nameJa), /*#__PURE__*/React.createElement("div", {
+    className: "q-meta-en"
+  }, L.nameEn))), /*#__PURE__*/React.createElement("h2", {
+    className: "q-text"
+  }, L.question), /*#__PURE__*/React.createElement("p", {
+    className: "q-context"
+  }, L.context), /*#__PURE__*/React.createElement("div", {
+    className: "q-choices"
+  }, L.choices.map((c, ci) => /*#__PURE__*/React.createElement(ChoiceItem, {
+    key: ci,
+    c: c,
+    ci: ci,
+    onSelect: () => onSelect(c.score)
+  })))));
+}
+
+// ─────────────────────────────────────────
+// CUSTOM LAYER INPUT
+// ─────────────────────────────────────────
+function CustomLayerInput({
+  onSubmit
+}) {
+  const [name, setName] = useState("");
+  const [score, setScore] = useState(null);
+  const [selCi, setSelCi] = useState(null);
+  const choices = [{
+    label: "ほぼ残らない",
+    sub: "その存在がなければ今の幸せの面影もない",
+    score: 5
+  }, {
+    label: "20〜30%程度",
+    sub: "大きく失われる——それほど重要な存在",
+    score: 25
+  }, {
+    label: "50%程度",
+    sub: "半分くらいは、それ以外でも成り立った",
+    score: 50
+  }, {
+    label: "70%以上残る",
+    sub: "影響はあるが、他の基盤で補えた部分も大きい",
+    score: 72
+  }];
+  function selectChoice(ci, s) {
+    setSelCi(ci);
+    setScore(s);
+    if (name.trim()) {
+      setTimeout(() => {
+        onSubmit(name.trim(), s);
+      }, 380);
+    }
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "sos-root",
+    style: {
+      minHeight: "100vh"
+    }
+  }, /*#__PURE__*/React.createElement("nav", {
+    className: "qnav"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "qnav-logo"
+  }, "S ON S"), /*#__PURE__*/React.createElement("div", {
+    className: "qnav-track"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "qnav-fill",
+    style: {
+      width: "50%"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "qnav-phase"
+  }, "Phase 1 \u2014 \u57FA\u76E4\u306E\u554F\u3044"), /*#__PURE__*/React.createElement("div", {
+    className: "qnav-count"
+  }, "+ \u03B1")), /*#__PURE__*/React.createElement("div", {
+    className: "q-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "q-scenario-tag"
+  }, "\u3042\u306A\u305F\u3060\u3051\u306E\u5C64"), /*#__PURE__*/React.createElement("div", {
+    className: "q-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "q-kanji",
+    style: {
+      color: "var(--gd)",
+      fontSize: 40,
+      lineHeight: 1.1
+    }
+  }, "\uFF0B"), /*#__PURE__*/React.createElement("div", {
+    className: "q-meta",
+    style: {
+      paddingTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "q-meta-ja"
+  }, "\u3042\u306A\u305F\u56FA\u6709\u306E\u6069\u6E90"), /*#__PURE__*/React.createElement("div", {
+    className: "q-meta-en"
+  }, "Your Unique Layer"))), /*#__PURE__*/React.createElement("h2", {
+    className: "q-text",
+    style: {
+      fontSize: "clamp(15px,2.4vw,20px)"
+    }
+  }, "6\u3064\u306E\u5C64\u4EE5\u5916\u306B\u2014\u2014", /*#__PURE__*/React.createElement("br", null), "\u3042\u306A\u305F\u306E\u5E78\u305B\u306B\u6B20\u304B\u305B\u306A\u3044\u5B58\u5728\u306F\u3042\u308A\u307E\u3059\u304B\uFF1F"), /*#__PURE__*/React.createElement("p", {
+    className: "q-context"
+  }, "\u5E2B\u5320\u30FB\u6069\u5E2B\u3001\u604B\u4EBA\u30FB\u30D1\u30FC\u30C8\u30CA\u30FC\u3001\u795E\u30FB\u4FE1\u4EF0\u3001\u7279\u5B9A\u306E\u53CB\u4EBA\u3001", /*#__PURE__*/React.createElement("br", null), "\u80B2\u3063\u305F\u5834\u6240\u3001\u4EBA\u751F\u3092\u5909\u3048\u305F\u4F5C\u54C1\u3001\u901A\u3063\u305F\u5B66\u6821\u3001\u696D\u754C\u3084\u8077\u80FD\u2014\u2014", /*#__PURE__*/React.createElement("br", null), "\u601D\u3044\u5F53\u305F\u308B\u5B58\u5728\u304C\u3042\u308C\u3070\u3001\u540D\u524D\u3092\u5165\u308C\u3066\u304F\u3060\u3055\u3044\u3002\u306A\u3051\u308C\u3070\u30B9\u30AD\u30C3\u30D7\u3067\u304D\u307E\u3059\u3002"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 28
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "\u4F8B\uFF1A\u5E2B\u5320\u306E\u7530\u4E2D\u3055\u3093\u3001\u795E\u3001\u4EA1\u304D\u7236",
+    value: name,
+    onChange: e => setName(e.target.value),
+    style: {
+      width: "100%",
+      background: "var(--s1)",
+      border: "1px solid var(--bd2)",
+      color: "var(--t0)",
+      fontFamily: "'Noto Sans JP',sans-serif",
+      fontSize: 15,
+      padding: "14px 16px",
+      outline: "none",
+      letterSpacing: ".05em",
+      transition: "border-color .2s"
+    },
+    onFocus: e => e.target.style.borderColor = "var(--gd)",
+    onBlur: e => e.target.style.borderColor = "var(--bd2)"
+  })), name.trim().length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", {
+    className: "q-text",
+    style: {
+      fontSize: "clamp(14px,2.2vw,19px)",
+      marginBottom: 10
+    }
+  }, "\u3082\u3057\u300C", name.trim(), "\u300D\u304C\u3044\u306A\u304B\u3063\u305F\u3068\u3057\u305F\u3089\u2014\u2014", /*#__PURE__*/React.createElement("br", null), "\u4ECA\u306E\u5E78\u305B\u306F\u3069\u308C\u304F\u3089\u3044\u6B8B\u3063\u3066\u3044\u307E\u3059\u304B\uFF1F"), /*#__PURE__*/React.createElement("div", {
+    className: "q-choices"
+  }, choices.map((c, ci) => /*#__PURE__*/React.createElement("div", {
+    key: ci,
+    className: `q-choice${selCi === ci ? " sel" : ""}`,
+    onClick: () => selectChoice(ci, c.score)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "choice-alpha"
+  }, String.fromCharCode(65 + ci)), /*#__PURE__*/React.createElement("div", {
+    className: "choice-body"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "choice-main"
+  }, c.label), /*#__PURE__*/React.createElement("div", {
+    className: "choice-sub"
+  }, c.sub)))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 32,
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => onSubmit(null, null),
+    style: {
+      background: "transparent",
+      border: "none",
+      color: "var(--t3)",
+      fontSize: 12,
+      cursor: "pointer",
+      letterSpacing: ".15em",
+      textDecoration: "underline",
+      textUnderlineOffset: 3
+    }
+  }, "\u30B9\u30AD\u30C3\u30D7\u3057\u3066\u6B21\u3078"))));
+}
+
+// ─────────────────────────────────────────
+// APP
+// ─────────────────────────────────────────
+window.App = function App() {
+  const [phase, setPhase] = useState("intro");
+  // "intro" | "on" | "transition" | "crisis" | "scoring" | "result"
+  const [onIdx, setOnIdx] = useState(0);
+  const [crisisQIdx, setCrisisQIdx] = useState(0);
+  const [onAnswers, setOnAnswers] = useState([]);
+  const [crisisAnswers, setCrisisAnswers] = useState({});
+  const [customLayer, setCustomLayer] = useState(null); // {name, score, crisisScore}
+  const [tooltip, setTooltip] = useState(null);
+  const [barWidths, setBarWidths] = useState({});
+  const [shownSections, setShownSections] = useState([]);
+  const [towerModal, setTowerModal] = useState(false);
+  const topRef = useRef(null);
+  useEffect(() => {
+    const id = "sos-style-v3";
+    if (!document.getElementById(id)) {
+      const el = document.createElement("style");
+      el.id = id;
+      el.textContent = CSS;
+      document.head.appendChild(el);
+    }
+  }, []);
+
+  // Animate bar widths after result shown
+  useEffect(() => {
+    if (shownSections.includes("ranking")) {
+      setTimeout(() => {
+        const {
+          ranked,
+          maxP
+        } = compute(onAnswers, crisisAnswers, customLayer);
+        const w = {};
+        ranked.forEach(r => {
+          w[r.i] = (r.p / maxP * 100).toFixed(1);
+        });
+        setBarWidths(w);
+      }, 300);
+    }
+  }, [shownSections]);
+  function scrollTop() {
+    topRef.current?.scrollIntoView({
+      behavior: "smooth"
+    });
+  }
+  function handleOnAnswer(score) {
+    const next = [...onAnswers, score];
+    setOnAnswers(next);
+    if (onIdx < LAYERS.length - 1) {
+      setOnIdx(i => i + 1);
+    } else {
+      // After 6 standard questions → custom layer input
+      setPhase("custom");
+    }
+    scrollTop();
+  }
+  function handleCustomLayer(name, score) {
+    // name=null means skipped
+    if (name) {
+      setCustomLayer({
+        name,
+        score,
+        crisisScore: 25
+      });
+    } else {
+      setCustomLayer(null);
+    }
+    setCrisisQIdx(0);
+    setPhase("transition");
+    scrollTop();
+  }
+  function handleCrisisAnswer(score) {
+    const q = CRISIS_Qs[crisisQIdx];
+    const next = {
+      ...crisisAnswers,
+      [q.layerIdx]: score
+    };
+    setCrisisAnswers(next);
+    // If there's a custom layer and we just finished standard crisis Qs, ask custom crisis
+    const hasCustom = customLayer && customLayer.name;
+    const isLastStandard = crisisQIdx >= CRISIS_Qs.length - 1;
+    if (!isLastStandard) {
+      setCrisisQIdx(i => i + 1);
+    } else if (hasCustom && crisisAnswers['custom'] === undefined) {
+      setPhase("crisis_custom");
+    } else {
+      setPhase("scoring");
+      setTimeout(() => {
+        setPhase("result");
+        scrollTop();
+      }, 2200);
+    }
+    scrollTop();
+  }
+  function handleCustomCrisis(score) {
+    setCustomLayer(prev => ({
+      ...prev,
+      crisisScore: score
+    }));
+    setPhase("scoring");
+    setTimeout(() => {
+      setPhase("result");
+      scrollTop();
+    }, 2200);
+    scrollTop();
+  }
+  function goBack() {
+    if (phase === "on") {
+      if (onIdx > 0) {
+        setOnIdx(i => i - 1);
+      } else {
+        setPhase("intro");
+      }
+    } else if (phase === "custom") {
+      setOnIdx(LAYERS.length - 1);
+      setPhase("on");
+    } else if (phase === "transition") {
+      setPhase("custom");
+    } else if (phase === "crisis") {
+      if (crisisQIdx > 0) {
+        setCrisisQIdx(i => i - 1);
+      } else {
+        setPhase("transition");
+      }
+    } else if (phase === "crisis_custom") {
+      setCrisisQIdx(CRISIS_Qs.length - 1);
+      setPhase("crisis");
+    } else if (phase === "result") {
+      // 最後のcrisis問いへ戻る
+      if (customLayer?.name) {
+        setPhase("crisis_custom");
+      } else {
+        setCrisisQIdx(CRISIS_Qs.length - 1);
+        setPhase("crisis");
+      }
+      setShownSections([]);
+    }
+    scrollTop();
+  }
+  function handleReveal() {
+    // Staggered section reveal
+    setShownSections(["header"]);
+    setTimeout(() => setShownSections(s => [...s, "tower"]), 400);
+    setTimeout(() => setShownSections(s => [...s, "ranking"]), 1200);
+    setTimeout(() => setShownSections(s => [...s, "message"]), 2200);
+  }
+  function restart() {
+    setOnAnswers([]);
+    setCrisisAnswers({});
+    setOnIdx(0);
+    setCrisisQIdx(0);
+    setBarWidths({});
+    setShownSections([]);
+    setCustomLayer(null);
+    setPhase("on");
+    scrollTop();
+  }
+
+  // ── INTRO ──
+  if (phase === "intro") return /*#__PURE__*/React.createElement("div", {
+    className: "sos-root",
+    ref: topRef
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "intro-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "intro-bg-k",
+    style: {
+      fontSize: 320,
+      top: -50,
+      left: -50
+    }
+  }, "\u5C64"), /*#__PURE__*/React.createElement("div", {
+    className: "intro-bg-k rev",
+    style: {
+      fontSize: 200,
+      bottom: -10,
+      right: -10
+    }
+  }, "\u57FA"), /*#__PURE__*/React.createElement("div", {
+    className: "intro-inner"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "intro-sos-hero"
+  }, /*#__PURE__*/React.createElement(SosLogo, {
+    size: "clamp(30px,6.5vw,56px)",
+    color: "var(--gp)",
+    dimTop: true
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "intro-tagline"
+  }, "12\u306E\u554F\u3044\u3092\u901A\u3058\u3066\u3001\u3042\u306A\u305F\u306E\u5854\u304C\u898B\u3048\u3066\u304D\u307E\u3059\u3002")), /*#__PURE__*/React.createElement("div", {
+    className: "intro-divider"
+  }), /*#__PURE__*/React.createElement("h1", {
+    className: "intro-title"
+  }, "\u3042\u306A\u305F\u306E\u5E78\u305B\u306F\u3001", /*#__PURE__*/React.createElement("br", null), "\u4F55\u306E\u4E0A\u306B\u6210\u308A\u7ACB\u3063\u3066\u3044\u307E\u3059\u304B\uFF1F"), /*#__PURE__*/React.createElement("p", {
+    className: "intro-sub"
+  }, "\u300C\u3082\u3057\u305D\u308C\u304C\u306A\u304B\u3063\u305F\u3089\u300D\u3068\u3044\u3046\u554F\u3044\u3092\u901A\u3058\u3066\u3001", /*#__PURE__*/React.createElement("br", null), "\u3042\u306A\u305F\u306E\u5E78\u305B\u3092\u652F\u3048\u3066\u304D\u305F\u3082\u306E\u306E\u5927\u304D\u3055\u304C\u3001\u5C11\u3057\u305A\u3064\u898B\u3048\u3066\u304D\u307E\u3059\u3002"), /*#__PURE__*/React.createElement("div", {
+    className: "intro-note"
+  }, "\u203B Phase 1\uFF08\u57FA\u76E4\u306E\u554F\u3044\uFF09+ Phase 2\uFF08\u73FE\u72B6\u306E\u554F\u3044\uFF09\u306E2\u6BB5\u968E\u3002\u6240\u8981\u6642\u9593\uFF1A\u7D044\u301C5\u5206\u3002", /*#__PURE__*/React.createElement("br", null), "\u3000\u9078\u629E\u80A2\u3092\u9078\u3076\u3068\u81EA\u52D5\u3067\u6B21\u306E\u554F\u3044\u3078\u9032\u307F\u307E\u3059\u3002"), /*#__PURE__*/React.createElement("div", {
+    className: "intro-begin-hint",
+    onClick: () => {
+      setPhase("on");
+      scrollTop();
+    }
+  }, "\u554F\u3044\u3092\u59CB\u3081\u308B", /*#__PURE__*/React.createElement("svg", {
+    className: "begin-arrow",
+    width: "16",
+    height: "10",
+    viewBox: "0 0 16 10",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M1 1L8 8L15 1",
+    stroke: "rgba(82,80,94,0.8)",
+    strokeWidth: "1.5",
+    strokeLinecap: "round"
+  }))))));
+
+  // ── PHASE 1 ──
+  if (phase === "on") {
+    const L = LAYERS[onIdx];
+    return /*#__PURE__*/React.createElement("div", {
+      className: "sos-root",
+      ref: topRef
+    }, /*#__PURE__*/React.createElement("nav", {
+      className: "qnav"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "qnav-logo"
+    }, "S ON S"), /*#__PURE__*/React.createElement("div", {
+      className: "qnav-track"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "qnav-fill",
+      style: {
+        width: onIdx / 12 * 100 + '%'
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "qnav-phase"
+    }, "Phase 1 \u2014 \u57FA\u76E4\u306E\u554F\u3044"), /*#__PURE__*/React.createElement("div", {
+      className: "qnav-count"
+    }, "Phase 1 \u2014 ", onIdx + 1)), /*#__PURE__*/React.createElement(QuestionCard, {
+      key: `on-${onIdx}`,
+      layer: L,
+      onSelect: handleOnAnswer,
+      onBack: goBack
+    }));
+  }
+
+  // ── CUSTOM LAYER INPUT ──
+  if (phase === "custom") return /*#__PURE__*/React.createElement(CustomLayerInput, {
+    onSubmit: handleCustomLayer
+  });
+
+  // ── CUSTOM CRISIS ──
+  if (phase === "crisis_custom") return /*#__PURE__*/React.createElement("div", {
+    className: "sos-root",
+    ref: topRef
+  }, /*#__PURE__*/React.createElement("nav", {
+    className: "qnav"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "qnav-logo"
+  }, "S ON S"), /*#__PURE__*/React.createElement("div", {
+    className: "qnav-track"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "qnav-fill",
+    style: {
+      width: "92%"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "qnav-phase"
+  }, "Phase 2 \u2014 \u5371\u6A5F\u5EA6\u306E\u554F\u3044"), /*#__PURE__*/React.createElement("div", {
+    className: "qnav-count"
+  }, "\u8FFD\u52A0")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "flex-end",
+      padding: "0 44px",
+      marginBottom: 4
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-back",
+    onClick: goBack
+  }, "\u2190 \u623B\u308B")), /*#__PURE__*/React.createElement("div", {
+    className: "q-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "q-scenario-tag"
+  }, "\u3042\u306A\u305F\u3060\u3051\u306E\u5C64 \u2014 \u5371\u6A5F\u5EA6"), /*#__PURE__*/React.createElement("div", {
+    className: "q-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "q-kanji",
+    style: {
+      color: "var(--gd)",
+      fontSize: 32,
+      paddingTop: 8
+    }
+  }, "\uFF0B"), /*#__PURE__*/React.createElement("div", {
+    className: "q-meta",
+    style: {
+      paddingTop: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "q-meta-ja"
+  }, customLayer?.name), /*#__PURE__*/React.createElement("div", {
+    className: "q-meta-en"
+  }, "Your Layer \u2014 Crisis"))), /*#__PURE__*/React.createElement("h2", {
+    className: "q-text"
+  }, "\u300C", customLayer?.name, "\u300D\u3068\u306E\u95A2\u4FC2\u306F\u3001", /*#__PURE__*/React.createElement("br", null), "\u4ECA\u5F8C\u3069\u308C\u304F\u3089\u3044\u640D\u306A\u308F\u308C\u308B\u30EA\u30B9\u30AF\u304C\u3042\u308A\u307E\u3059\u304B\uFF1F"), /*#__PURE__*/React.createElement("p", {
+    className: "q-context"
+  }, "\u30D4\u30FC\u30AF\u72B6\u614B\u3092100%\u3068\u3057\u3066\u3001\u3069\u308C\u304F\u3089\u3044\u306E\u30EA\u30B9\u30AF\u306B\u3055\u3089\u3055\u308C\u3066\u3044\u308B\u304B\u3092\u76F4\u611F\u3067\u9078\u3093\u3067\u304F\u3060\u3055\u3044\u3002"), /*#__PURE__*/React.createElement("div", {
+    className: "q-choices"
+  }, CRISIS_CHOICES.map((c, ci) => /*#__PURE__*/React.createElement(ChoiceItem, {
+    key: ci,
+    c: c,
+    ci: ci,
+    onSelect: () => handleCustomCrisis(c.score)
+  })))));
+
+  // ── MID TOWER (寄与度のみ、侵食なし) ──
+  if (phase === "transition") {
+    const contribsMid = onAnswers.map(s => 100 - s);
+    const customRawMid = customLayer?.name && customLayer.score != null ? 100 - customLayer.score : 0;
+    const totalMid = contribsMid.reduce((a, b) => a + b, 0) + customRawMid || 1;
+    const midContribPcts = contribsMid.map(v => v / totalMid * 100);
+    const midCustomPct = customRawMid > 0 ? customRawMid / totalMid * 100 : null;
+    const selfPctMid = midContribPcts[5] || 0;
+    const midExternalDep = Math.round(100 - selfPctMid);
+    const zeroCrisis = LAYERS.map(() => 0);
+    return /*#__PURE__*/React.createElement("div", {
+      className: "sos-root",
+      ref: topRef,
+      style: {
+        minHeight: "100vh"
+      }
+    }, /*#__PURE__*/React.createElement("nav", {
+      className: "qnav"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "qnav-logo"
+    }, "S ON S"), /*#__PURE__*/React.createElement("div", {
+      className: "qnav-track"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "qnav-fill",
+      style: {
+        width: "50%"
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "qnav-phase"
+    }, "Phase 1 \u5B8C\u4E86"), /*#__PURE__*/React.createElement("div", {
+      className: "qnav-count"
+    }, "6 / 12")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        maxWidth: 760,
+        margin: "0 auto",
+        padding: "48px 44px"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: "'Cormorant Garamond',serif",
+        fontSize: 11,
+        letterSpacing: ".3em",
+        color: "var(--gd)",
+        textTransform: "uppercase",
+        marginBottom: 20,
+        animation: "fadeUp .6s ease both"
+      }
+    }, "Your Tower of Life \u2014 Phase 1"), /*#__PURE__*/React.createElement("h2", {
+      style: {
+        fontFamily: "'Shippori Mincho',serif",
+        fontWeight: 400,
+        fontSize: "clamp(18px,3vw,26px)",
+        lineHeight: 1.6,
+        color: "var(--t0)",
+        marginBottom: 4,
+        animation: "fadeUp .6s ease .1s both"
+      }
+    }, "\u3053\u308C\u304C\u3001\u3042\u306A\u305F\u306E\u5E78\u305B\u306E\u571F\u53F0\u3067\u3059\u3002"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: 13,
+        color: "var(--t2)",
+        marginBottom: 4,
+        animation: "fadeUp .6s ease .15s both"
+      }
+    }, "\u5404\u5C64\u306E\u9AD8\u3055 \uFF1D \u305D\u306E\u6075\u307F\u306E\u5927\u304D\u3055"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: 13,
+        color: "var(--gd)",
+        marginBottom: 28,
+        animation: "fadeUp .6s ease .2s both"
+      }
+    }, "\u5916\u90E8\u4F9D\u5B58\u5EA6\xA0", /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 20,
+        fontFamily: "'Cormorant Garamond',serif",
+        fontWeight: 600
+      }
+    }, midExternalDep, "%"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--t3)",
+        fontSize: 11
+      }
+    }, "\xA0\u2014\u2014\u3042\u306A\u305F\u306E\u5E78\u305B\u306E", midExternalDep, "%\u306F\u3001\u81EA\u5206\u4EE5\u5916\u306E\u4F55\u304B\u304C\u652F\u3048\u3066\u3044\u307E\u3059")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        animation: "fadeUp .6s ease .3s both"
+      }
+    }, /*#__PURE__*/React.createElement(TowerSVG, {
+      contribPcts: midContribPcts,
+      crisisScores: zeroCrisis,
+      customLayer: customLayer,
+      customPct: midCustomPct,
+      onHover: () => {},
+      onLeave: () => {}
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 40,
+        height: 1,
+        background: "var(--bd2)",
+        margin: "8px 0 28px",
+        animation: "fadeUp .6s ease .5s both"
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
+        color: "var(--t1)",
+        lineHeight: 1.95,
+        marginBottom: 32,
+        animation: "fadeUp .6s ease .65s both"
+      }
+    }, "\u6B21\u306F\u3001\u305D\u308C\u305E\u308C\u306E\u6075\u307F\u304C", /*#__PURE__*/React.createElement("br", null), "\u4ECA\u3069\u308C\u304F\u3089\u3044\u5B89\u5B9A\u3057\u3066\u3044\u308B\u304B\u3092\u78BA\u8A8D\u3057\u307E\u3059\u3002", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--t2)",
+        fontSize: 12
+      }
+    }, "\u56DE\u7B54\u306B\u3088\u3063\u3066\u3001\u3053\u306E\u5854\u306B\u4FB5\u98DF\u304C\u52A0\u308F\u308A\u307E\u3059\u3002")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        animation: "fadeUp .6s ease .75s both"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "intro-begin-hint",
+      style: {
+        marginTop: 0
+      },
+      onClick: () => {
+        setCrisisQIdx(0);
+        setPhase("crisis");
+        scrollTop();
+      }
+    }, "Phase 2 \u3078\u9032\u3080", /*#__PURE__*/React.createElement("svg", {
+      className: "begin-arrow",
+      width: "16",
+      height: "10",
+      viewBox: "0 0 16 10",
+      fill: "none"
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M1 1L8 8L15 1",
+      stroke: "rgba(82,80,94,0.8)",
+      strokeWidth: "1.5",
+      strokeLinecap: "round"
+    })))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        textAlign: "left",
+        marginTop: 24
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "btn-back",
+      onClick: goBack
+    }, "\u2190 \u623B\u308B"))), /*#__PURE__*/React.createElement("style", null, `@keyframes dotpulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.3);background:var(--gd)}}`));
+  }
+
+  // ── PHASE 2 ──
+  if (phase === "crisis") {
+    const cq = CRISIS_Qs[crisisQIdx];
+    return /*#__PURE__*/React.createElement("div", {
+      className: "sos-root",
+      ref: topRef
+    }, /*#__PURE__*/React.createElement("nav", {
+      className: "qnav"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "qnav-logo"
+    }, "S ON S"), /*#__PURE__*/React.createElement("div", {
+      className: "qnav-track"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "qnav-fill",
+      style: {
+        width: (6 + crisisQIdx) / 12 * 100 + '%'
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "qnav-phase"
+    }, "Phase 2 \u2014 \u5371\u6A5F\u5EA6\u306E\u554F\u3044"), /*#__PURE__*/React.createElement("div", {
+      className: "qnav-count"
+    }, "Phase 2 \u2014 ", crisisQIdx + 1)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "flex-end",
+        padding: "4px 44px 0"
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "btn-back",
+      onClick: goBack
+    }, "\u2190 \u623B\u308B")), /*#__PURE__*/React.createElement("div", {
+      className: "q-wrap",
+      key: `crisis-${crisisQIdx}`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "q-scenario-tag"
+    }, "\u5371\u6A5F\u5EA6 \u2014 \u4ECA\u5F8C20\u301C30\u5E74\u306E\u30EA\u30B9\u30AF"), /*#__PURE__*/React.createElement("div", {
+      className: "q-head"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "q-kanji",
+      style: {
+        color: cq.color
+      }
+    }, cq.kanji), /*#__PURE__*/React.createElement("div", {
+      className: "q-meta"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "q-meta-ja"
+    }, cq.nameJa), /*#__PURE__*/React.createElement("div", {
+      className: "q-meta-en"
+    }, "Crisis Assessment"))), /*#__PURE__*/React.createElement("h2", {
+      className: "q-text"
+    }, cq.question), /*#__PURE__*/React.createElement("p", {
+      className: "q-context"
+    }, cq.context), /*#__PURE__*/React.createElement("div", {
+      className: "q-choices"
+    }, CRISIS_CHOICES.map((c, ci) => /*#__PURE__*/React.createElement(ChoiceItem, {
+      key: ci,
+      c: c,
+      ci: ci,
+      onSelect: () => handleCrisisAnswer(c.score)
+    }))), /*#__PURE__*/React.createElement("button", {
+      className: "btn-back",
+      onClick: goBack
+    }, "\u2190 \u623B\u308B")));
+  }
+
+  // ── SCORING ──
+  if (phase === "scoring") return /*#__PURE__*/React.createElement("div", {
+    className: "sos-root",
+    ref: topRef,
+    style: {
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      textAlign: "center",
+      padding: "40px 32px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 480,
+      animation: "fadeUp .6s ease both"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Cormorant Garamond',serif",
+      fontSize: 11,
+      letterSpacing: ".3em",
+      color: "var(--gd)",
+      textTransform: "uppercase",
+      marginBottom: 24
+    }
+  }, "Phase 2 complete"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Shippori Mincho',serif",
+      fontWeight: 400,
+      fontSize: "clamp(19px,3.5vw,28px)",
+      lineHeight: 1.7,
+      color: "var(--t0)",
+      marginBottom: 20
+    }
+  }, "12\u306E\u554F\u3044\u304C\u7D42\u308F\u308A\u307E\u3057\u305F\u3002"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 40,
+      height: 1,
+      background: "var(--bd2)",
+      margin: "0 auto 20px"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "var(--t1)",
+      lineHeight: 1.95
+    }
+  }, "\u3042\u306A\u305F\u306E\u56DE\u7B54\u304B\u3089\u3001\u5E78\u305B\u306E\u69CB\u9020\u3092\u7B97\u51FA\u3057\u3066\u3044\u307E\u3059\u3002"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 32,
+      display: "flex",
+      justifyContent: "center",
+      gap: 8
+    }
+  }, [0, 1, 2].map(i => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    style: {
+      width: 6,
+      height: 6,
+      borderRadius: "50%",
+      background: "var(--bd2)",
+      display: "inline-block",
+      animation: `dotpulse 1.2s ease ${i * 0.3}s infinite`
+    }
+  })))), /*#__PURE__*/React.createElement("style", null, `@keyframes dotpulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.3);background:var(--gd)}}`));
+
+  // ── RESULT ──
+  if (phase === "result") {
+    const {
+      contribPcts,
+      externalPcts,
+      selfContribRaw,
+      externalDependency,
+      crisisScores,
+      priorities,
+      ranked,
+      maxP,
+      customContrib,
+      customPriority,
+      customPct
+    } = compute(onAnswers, crisisAnswers, customLayer);
+    const top = ranked[0];
+    const isTopCustom = top.isCustom;
+    const topL = isTopCustom ? null : LAYERS[top.i];
+    const topColor = isTopCustom ? "#a07850" : topL.color;
+    const topName = isTopCustom ? customLayer?.name || "" : topL.nameJa;
+    const topKanji = isTopCustom ? "＋" : topL.kanji;
+    const crisisClass = c => c >= 65 ? "high" : c >= 35 ? "mid" : "low";
+    const revealed = shownSections.length > 0;
+    const actionHints = {
+      0: "地球環境への関与——気候・生態系に関わる活動や投資に目を向けてみることが、自然な出発点になるかもしれません。",
+      1: "文明・知識の継承——教育・研究・文化の担い手として何かを残すことを、少し考えてみてください。",
+      2: "社会・日本への関与——政策、地域、組織、どのレベルでも構いません。関わりの形を探してみてください。",
+      3: "組織・環境の改善——良い環境は自然には生まれません。あなたが感じた恵みを、次の誰かに渡せるかもしれません。",
+      4: "家族・共同体への投資——時間とエネルギーを、近くにいる人との関係に意識的に使うことから始められます。",
+      5: "自分自身への投資——外部依存を知った上での自己強化は、より深い行動につながります。"
+    };
+    return /*#__PURE__*/React.createElement("div", {
+      className: "sos-root",
+      ref: topRef
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "result-wrap"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "res-header",
+      style: {
+        animation: "fadeUp .6s ease both"
+      }
+    }, /*#__PURE__*/React.createElement(SosLogo, {
+      size: "clamp(14px,2.8vw,22px)",
+      color: "var(--gp)",
+      dimTop: true
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "res-tagline-small"
+    }, "\u8A3A\u65AD\u7D50\u679C")), /*#__PURE__*/React.createElement("h2", {
+      className: "res-reveal-title",
+      style: {
+        animation: "fadeUp .6s ease .1s both"
+      }
+    }, externalDependency >= 75 ? /*#__PURE__*/React.createElement(React.Fragment, null, "\u7A4D\u307F\u91CD\u306A\u3063\u3066\u3001\u3053\u3053\u306B\u3044\u308B\u3002") : externalDependency >= 50 ? /*#__PURE__*/React.createElement(React.Fragment, null, "\u81EA\u5206\u306E\u529B\u3068\u3001\u305D\u306E\u571F\u53F0\u3068\u3002") : /*#__PURE__*/React.createElement(React.Fragment, null, "\u81EA\u529B\u304C\u3001\u3053\u306E\u5854\u306E\u9802\u306B\u3044\u308B\u3002")), !revealed && /*#__PURE__*/React.createElement("div", {
+      className: "reveal-btn-wrap",
+      style: {
+        animation: "fadeUp .6s ease .3s both"
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "reveal-btn",
+      onClick: handleReveal
+    }, "\u7D50\u679C\u3092\u898B\u308B"), /*#__PURE__*/React.createElement("div", {
+      className: "reveal-btn-sub"
+    }, "\u8A3A\u65AD\u7D50\u679C\u3092\u5C55\u958B\u3059\u308B")), revealed && /*#__PURE__*/React.createElement("div", {
+      className: `reveal-section${shownSections.includes("tower") ? " shown" : ""}`
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: 20,
+        padding: "14px 18px",
+        background: "var(--s1)",
+        borderLeft: "2px solid var(--bd2)",
+        fontSize: 12,
+        color: "var(--t2)",
+        lineHeight: 2
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: "var(--t1)",
+        fontWeight: 700,
+        marginBottom: 4,
+        fontSize: 13
+      }
+    }, "\u3053\u306E\u5854\u306E\u898B\u65B9"), /*#__PURE__*/React.createElement("div", null, "\uD83D\uDCD0 ", /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: "var(--t1)"
+      }
+    }, "\u5C64\u306E\u9AD8\u3055"), "\u3000\uFF1D\u3000\u3042\u306A\u305F\u306E\u5E78\u305B\u3078\u306E\u5BC4\u4E0E\u5EA6\uFF08%\uFF09"), /*#__PURE__*/React.createElement("div", null, "\uD83C\uDF0A ", /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: "var(--t1)"
+      }
+    }, "\u4E0B\u90E8\u306E\u4FB5\u98DF"), "\u3000\uFF1D\u3000\u4ECA\u5F8C\u306E\u30EA\u30B9\u30AF\u30FB\u5371\u6A5F\u5EA6"), /*#__PURE__*/React.createElement("div", null, "\uD83D\uDD35 ", /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: "var(--t1)"
+      }
+    }, "\u5DE6\u306E\u592A\u3044\u5F27"), "\u3000\uFF1D\u3000\u6700\u3082\u8FD4\u3057\u305F\u3044\u6069\u306E\u5148\uFF08\u512A\u5148\u5EA61\u4F4D\uFF09")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "relative",
+        cursor: "pointer"
+      },
+      onClick: () => setTowerModal(true)
+    }, /*#__PURE__*/React.createElement(TowerSVG, {
+      contribPcts: contribPcts,
+      crisisScores: crisisScores,
+      topLayerIdx: top.i,
+      customLayer: customLayer,
+      customPct: customPct,
+      onHover: (e, idx) => {
+        const rect = e.currentTarget.closest('div').getBoundingClientRect();
+        setTooltip({
+          x: e.clientX - rect.left + 10,
+          y: e.clientY - rect.top - 10,
+          idx
+        });
+      },
+      onLeave: () => setTooltip(null)
+    }), tooltip !== null && LAYERS[tooltip.idx] && /*#__PURE__*/React.createElement("div", {
+      className: "tower-tooltip",
+      style: {
+        left: tooltip.x,
+        top: tooltip.y
+      }
+    }, /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: LAYERS[tooltip.idx].color
+      }
+    }, LAYERS[tooltip.idx].kanji, "\u3000", LAYERS[tooltip.idx].nameJa), /*#__PURE__*/React.createElement("br", null), "\u5BC4\u4E0E\u5EA6\uFF1A", (contribPcts[tooltip.idx] || 0).toFixed(0), "%", /*#__PURE__*/React.createElement("br", null), "\u5371\u6A5F\u5EA6\uFF1A", crisisScores[tooltip.idx] || 0, "%")), towerModal && /*#__PURE__*/React.createElement("div", {
+      className: "tower-modal-overlay",
+      onClick: () => setTowerModal(false)
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "tower-modal-close",
+      onClick: () => setTowerModal(false)
+    }, "\u2715"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: "100%",
+        padding: "0 8px"
+      },
+      onClick: e => e.stopPropagation()
+    }, /*#__PURE__*/React.createElement(TowerSVG, {
+      contribPcts: contribPcts,
+      crisisScores: crisisScores,
+      topLayerIdx: top.i,
+      customLayer: customLayer,
+      customPct: customPct,
+      onHover: () => {},
+      onLeave: () => {}
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--t3)",
+        marginTop: 12,
+        letterSpacing: ".08em"
+      }
+    }, "\u30BF\u30C3\u30D7\u3057\u3066\u9589\u3058\u308B")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "baseline",
+        marginTop: 8,
+        marginBottom: 4
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: "'Cormorant Garamond',serif",
+        fontStyle: "italic",
+        fontSize: 11,
+        color: "var(--t3)",
+        letterSpacing: ".12em"
+      }
+    }, "Your Tower of Life"), /*#__PURE__*/React.createElement("div", {
+      className: "tower-tap-hint",
+      onClick: () => setTowerModal(true)
+    }, "\u62E1\u5927 \u2197"), /*#__PURE__*/React.createElement(SosLogo, {
+      size: 10,
+      color: "var(--gd2)",
+      dimTop: true
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        textAlign: "center",
+        marginTop: 12,
+        marginBottom: 4,
+        fontSize: 11,
+        color: "var(--t3)",
+        letterSpacing: ".08em"
+      }
+    }, "\uD83D\uDCF8 \u3053\u306E\u753B\u9762\u3092\u30B9\u30AF\u30EA\u30FC\u30F3\u30B7\u30E7\u30C3\u30C8\u3067\u4FDD\u5B58\u3057\u3066\u304A\u304F\u3068\u4FBF\u5229\u3067\u3059")), " ", revealed && /*#__PURE__*/React.createElement("div", {
+      className: `reveal-section ranking-section${shownSections.includes("ranking") ? " shown" : ""}`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "section-head"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "section-head-label"
+    }, "\u6069\u8FD4\u3057\u512A\u5148\u5EA6\u30E9\u30F3\u30AD\u30F3\u30B0")), /*#__PURE__*/React.createElement("div", {
+      className: "ranking-note"
+    }, /*#__PURE__*/React.createElement("strong", null, "\u5BC4\u4E0E\u5EA6 \xD7 \u5371\u6A5F\u5EA6 \uFF1D \u512A\u5148\u5EA6\u30B9\u30B3\u30A2\u3002"), /*#__PURE__*/React.createElement("br", null), "\u300C\u3042\u306A\u305F\u3078\u306E\u6075\u307F\u304C\u5927\u304D\u3044\u307B\u3069\u300D\u304B\u3064\u300C\u4ECA\u307E\u3055\u306B\u63FA\u3089\u3044\u3067\u3044\u308B\u307B\u3069\u300D\u3001\u512A\u5148\u5EA6\u304C\u9AD8\u304F\u306A\u308A\u307E\u3059\u3002", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--t2)",
+        fontSize: 11
+      }
+    }, "\u3053\u308C\u306F\u8A3A\u65AD\u304B\u3089\u306E\u30D2\u30F3\u30C8\u3067\u3059\u3002\u6B63\u89E3\u306F\u3042\u308A\u307E\u305B\u3093\u3002")), /*#__PURE__*/React.createElement("div", {
+      className: "rank-header"
+    }, /*#__PURE__*/React.createElement("div", null), /*#__PURE__*/React.createElement("div", {
+      className: "rank-header-cell",
+      style: {
+        textAlign: "center"
+      }
+    }, "\u5C64"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "grid",
+        gridTemplateColumns: "1fr auto 1fr",
+        gap: 4
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "rank-header-cell"
+    }, "\u5BC4\u4E0E\u5EA6"), /*#__PURE__*/React.createElement("div", {
+      className: "rank-header-cell",
+      style: {
+        color: "var(--t3)"
+      }
+    }, "\xD7"), /*#__PURE__*/React.createElement("div", {
+      className: "rank-header-cell"
+    }, "\u5371\u6A5F\u5EA6")), /*#__PURE__*/React.createElement("div", {
+      className: "rank-header-cell",
+      style: {
+        textAlign: "right"
+      }
+    }, "\u512A\u5148\u5EA6")), /*#__PURE__*/React.createElement("div", {
+      className: "rank-table"
+    }, ranked.map((r, rank) => {
+      const isCustom = r.isCustom;
+      const L = isCustom ? null : LAYERS[r.i];
+      const layerColor = isCustom ? "#a07850" : L.color;
+      const layerKanji = isCustom ? "＋" : L.kanji;
+      const layerName = isCustom ? customLayer?.name || "" : L.nameJa;
+      const contrib = isCustom ? (customContrib || 0).toFixed(0) : externalPcts[r.i].toFixed(0);
+      const crisis = isCustom ? customLayer?.crisisScore || 25 : crisisScores[r.i];
+      return /*#__PURE__*/React.createElement("div", {
+        key: r.i,
+        className: `rank-row rk${Math.min(rank + 1, 6)}`
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "rk-num"
+      }, rank + 1), /*#__PURE__*/React.createElement("div", {
+        className: "rk-layer"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "rk-kanji",
+        style: {
+          color: layerColor,
+          fontSize: isCustom ? 16 : undefined
+        }
+      }, layerKanji), /*#__PURE__*/React.createElement("div", {
+        className: "rk-name"
+      }, layerName)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+        className: "rk-bar-wrap"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "rk-bar-fill",
+        style: {
+          background: layerColor,
+          width: (barWidths[r.i] || 0) + "%"
+        }
+      })), /*#__PURE__*/React.createElement("div", {
+        className: "rk-detail"
+      }, /*#__PURE__*/React.createElement("span", null, "\u5BC4\u4E0E", /*#__PURE__*/React.createElement("b", null, " ", contrib)), /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: "var(--t3)"
+        }
+      }, "\xD7"), /*#__PURE__*/React.createElement("span", null, "\u5371\u6A5F", /*#__PURE__*/React.createElement("b", null, " ", crisis, "%")))), /*#__PURE__*/React.createElement("div", {
+        className: "rk-score"
+      }, r.p.toFixed(0)));
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "winner-box"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "winner-label"
+    }, "\u3053\u306E\u8A3A\u65AD\u304B\u3089\u306E\u793A\u5506"), /*#__PURE__*/React.createElement("div", {
+      className: "winner-title"
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: topColor
+      }
+    }, topKanji, "\u3000"), topName, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: ".6em",
+        color: "var(--t2)",
+        fontFamily: "'Cormorant Garamond',serif",
+        marginLeft: 12
+      }
+    }, "\u512A\u5148\u5EA6\u30B9\u30B3\u30A2 ", top.p.toFixed(0))), /*#__PURE__*/React.createElement("div", {
+      className: "winner-desc",
+      style: {
+        marginBottom: 20
+      }
+    }, isTopCustom ? `「${topName}」はあなただけの基盤です。その存在の大きさと危うさが、この診断で見えてきました。` : `寄与度 ${externalPcts[top.i].toFixed(0)}% × 危機度 ${crisisScores[top.i]}% ——${topL.idx === 2 ? " 日本という場所への感謝が、あなたの中に静かにある。その場所は今、変化のただ中にいます。" : topL.idx === 0 ? " 地球という根本的な基盤への感謝が深い。すべての出発点への眼差しを持っている方です。" : ` 「${topName}」への感謝が最も大きく、かつ最もリスクにさらされている。`}`))), " ", revealed && /*#__PURE__*/React.createElement("div", {
+      className: `reveal-section message-section${shownSections.includes("message") ? " shown" : ""}`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "section-head"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "section-head-label"
+    }, "\u3053\u306E\u554F\u3044\u3092\u7D42\u3048\u3066")), /*#__PURE__*/React.createElement("div", {
+      className: "res-msg"
+    }, /*#__PURE__*/React.createElement("em", null, "\u98F2\u6C34\u601D\u6E90\u2014\u2014\u6C34\u3092\u98F2\u3080\u3068\u304D\u3001\u305D\u306E\u6E90\u6CC9\u3092\u601D\u3048\u3002"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("br", null), "\u3042\u306A\u305F\u306E\u5E78\u305B\u306E", /*#__PURE__*/React.createElement("strong", null, externalDependency, "%"), "\u306F\u3001\u81EA\u5206\u4EE5\u5916\u306E\u4F55\u304B\u304C\u652F\u3048\u3066\u3044\u307E\u3059\u3002", /*#__PURE__*/React.createElement("br", null), "\u5730\u7403\u3001\u6587\u660E\u3001\u56FD\u3001\u7D44\u7E54\u3001\u5BB6\u65CF\u2014\u2014", /*#__PURE__*/React.createElement("strong", null, "\u3053\u308C\u3060\u3051\u591A\u304F\u306E\u3082\u306E\u306B\u6075\u307E\u308C\u3066\u3001\u4ECA\u306E\u3042\u306A\u305F\u304C\u3044\u307E\u3059\u3002"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("br", null), isTopCustom ? /*#__PURE__*/React.createElement(React.Fragment, null, "\u300C", topName, "\u300D\u2014\u2014\u305D\u306E\u5B58\u5728\u304C\u3044\u3066\u304F\u308C\u308B\u3053\u3068\u3078\u306E\u611F\u8B1D\u304C\u3001\u3053\u306E\u554F\u3044\u3067\u6D6E\u304B\u3073\u4E0A\u304C\u308A\u307E\u3057\u305F\u3002", /*#__PURE__*/React.createElement("br", null), "\u5927\u5207\u306B\u3057\u3066\u304F\u308C\u305F\u5B58\u5728\u3092\u3001\u5927\u5207\u306B\u3057\u305F\u304F\u306A\u308B\u3002\u305D\u306E\u6C17\u6301\u3061\u304C\u3001\u529B\u306E\u6E90\u306B\u306A\u308A\u307E\u3059\u3002") : topL.idx === 2 ? /*#__PURE__*/React.createElement(React.Fragment, null, "\u65E5\u672C\u3068\u3044\u3046\u5834\u6240\u306B\u751F\u307E\u308C\u305F\u6075\u307F\u306F\u3001\u610F\u8B58\u3057\u306A\u3051\u308C\u3070\u5F53\u305F\u308A\u524D\u306B\u898B\u3048\u307E\u3059\u3002", /*#__PURE__*/React.createElement("br", null), "\u3067\u3082\u305D\u306E\u5834\u6240\u3092\u8C4A\u304B\u306B\u3057\u305F\u3044\u3068\u601D\u3046\u6C17\u6301\u3061\u304C\u3001\u3042\u306A\u305F\u306E\u529B\u306E\u51FA\u3069\u3053\u308D\u306B\u306A\u308B\u304B\u3082\u3057\u308C\u307E\u305B\u3093\u3002") : topL.idx === 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, "\u5730\u7403\u3068\u3044\u3046\u3001\u3059\u3079\u3066\u306E\u51FA\u767A\u70B9\u3078\u306E\u773C\u5DEE\u3057\u3092\u6301\u3063\u3066\u3044\u308B\u3053\u3068\u304C\u3001\u3053\u306E\u554F\u3044\u3067\u898B\u3048\u3066\u304D\u307E\u3057\u305F\u3002", /*#__PURE__*/React.createElement("br", null), "\u305D\u306E\u611F\u899A\u306F\u3001\u884C\u52D5\u306E\u4E00\u756A\u6DF1\u3044\u3068\u3053\u308D\u306B\u3042\u308B\u52D5\u6A5F\u306B\u306A\u308A\u3048\u307E\u3059\u3002") : topL.idx === 4 ? /*#__PURE__*/React.createElement(React.Fragment, null, "\u5BB6\u65CF\u3084\u5171\u540C\u4F53\u306E\u6E29\u304B\u3055\u306E\u4E2D\u3067\u80B2\u3063\u3066\u304D\u305F\u3053\u3068\u3078\u306E\u611F\u8B1D\u304C\u3001\u3042\u306A\u305F\u306E\u4E2D\u306B\u5927\u304D\u304F\u3042\u308B\u3088\u3046\u3067\u3059\u3002", /*#__PURE__*/React.createElement("br", null), "\u305D\u306E\u6E29\u304B\u3055\u3092\u8AB0\u304B\u306B\u6E21\u3057\u305F\u3044\u2014\u2014\u305D\u3046\u601D\u3048\u308B\u4EBA\u306F\u3001\u5F37\u3044\u3002") : topL.idx === 3 ? /*#__PURE__*/React.createElement(React.Fragment, null, "\u826F\u3044\u74B0\u5883\u306B\u6075\u307E\u308C\u305F\u4EBA\u304C\u3001\u6B21\u306E\u826F\u3044\u74B0\u5883\u3092\u3064\u304F\u3063\u3066\u3044\u304F\u3002", /*#__PURE__*/React.createElement("br", null), "\u3042\u306A\u305F\u304C\u611F\u3058\u3066\u304D\u305F\u7D44\u7E54\u306E\u6075\u307F\u3092\u3001\u8AB0\u304B\u306B\u9084\u305B\u308B\u306A\u3089\u2014\u2014\u305D\u308C\u304C\u529B\u306E\u51FA\u3069\u3053\u308D\u306B\u306A\u308A\u307E\u3059\u3002") : topL.idx === 1 ? /*#__PURE__*/React.createElement(React.Fragment, null, "\u73FE\u4EE3\u3068\u3044\u3046\u8C4A\u304B\u306A\u6642\u4EE3\u306B\u751F\u304D\u3089\u308C\u3066\u3044\u308B\u3053\u3068\u3078\u306E\u611F\u8B1D\u304C\u3001\u3053\u306E\u554F\u3044\u3067\u6D6E\u304B\u3073\u4E0A\u304C\u308A\u307E\u3057\u305F\u3002", /*#__PURE__*/React.createElement("br", null), "\u53D7\u3051\u7D99\u3044\u3060\u3082\u306E\u3092\u6B21\u3078\u6E21\u3059\u3053\u3068\u304C\u3001\u3053\u306E\u6642\u4EE3\u306B\u751F\u304D\u308B\u610F\u5473\u306B\u306A\u308B\u304B\u3082\u3057\u308C\u307E\u305B\u3093\u3002") : /*#__PURE__*/React.createElement(React.Fragment, null, "\u81EA\u5206\u306E\u529B\u3092\u4FE1\u3058\u308B\u3053\u3068\u306F\u3001\u5927\u5207\u306A\u5F37\u3055\u3067\u3059\u3002", /*#__PURE__*/React.createElement("br", null), "\u305D\u306E\u529B\u304C\u3069\u3053\u304B\u3089\u80B2\u3063\u305F\u304B\u3092\u77E5\u308B\u3068\u3001\u6B21\u306B\u4F55\u306E\u305F\u3081\u306B\u529B\u3092\u4F7F\u3046\u304B\u304C\u3001\u898B\u3048\u3066\u304F\u308B\u304B\u3082\u3057\u308C\u307E\u305B\u3093\u3002")), /*#__PURE__*/React.createElement("div", {
+      className: "proverb-final"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "pf-east"
+    }, "\u98F2 \u6C34 \u601D \u6E90"), /*#__PURE__*/React.createElement("div", {
+      className: "pf-east-sub"
+    }, "\u6C34\u3092\u98F2\u3080\u3068\u304D\u3001\u305D\u306E\u6E90\u6CC9\u3092\u601D\u3048\uFF08\u4E2D\u56FD\u53E4\u5178\uFF09"), /*#__PURE__*/React.createElement("div", {
+      className: "pf-sep"
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "pf-west"
+    }, "\"No duty is more urgent than that of returning thanks.\""), /*#__PURE__*/React.createElement("div", {
+      className: "pf-attr"
+    }, "\u2014 Saint Ambrose, 4th century")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: 28,
+        padding: "18px 20px",
+        border: "1px solid var(--bd)",
+        borderLeft: "2px solid var(--gd2)",
+        fontSize: 12,
+        color: "var(--t2)",
+        lineHeight: 1.9
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        letterSpacing: ".2em",
+        color: "var(--gd2)",
+        textTransform: "uppercase",
+        marginBottom: 8
+      }
+    }, "Beta \u2014 \u53CB\u4EBA\u5411\u3051\u8A66\u9A13\u7248"), "\u3053\u306E\u30B3\u30F3\u30C6\u30F3\u30C4\u306F\u73FE\u5728\u958B\u767A\u4E2D\u3067\u3059\u3002\u6700\u7D42\u66F4\u65B0\uFF1A", /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: "var(--t1)"
+      }
+    }, "2025\u5E743\u6708"), /*#__PURE__*/React.createElement("br", null), "\u611F\u60F3\u30FB\u6C17\u3065\u304D\u30FB\u6539\u5584\u30A2\u30A4\u30C7\u30A2\u304C\u3042\u308C\u3070\u3001\u305C\u3072\u6559\u3048\u3066\u304F\u3060\u3055\u3044\u3002", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("a", {
+      href: "mailto:kuniakimat1@gmail.com",
+      style: {
+        color: "var(--gd)",
+        textDecoration: "none",
+        letterSpacing: ".05em"
+      }
+    }, "kuniakimat1@gmail.com")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginTop: 8
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "btn-back",
+      onClick: goBack
+    }, "\u2190 \u623B\u308B"), /*#__PURE__*/React.createElement("button", {
+      className: "btn-restart",
+      onClick: restart
+    }, "\u3082\u3046\u4E00\u5EA6\u8003\u3048\u308B"))), " "));
+  }
+  return null;
+};
+  ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(window.App));
+  </script>
+</body>
+</html>
