@@ -1315,6 +1315,31 @@ window.App = function App() {
   const [barWidths, setBarWidths] = useState({});
   const [shownSections, setShownSections] = useState([]);
   const [towerModal, setTowerModal] = useState(false);
+
+  // URLパラメータから結果を復元
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const r = params.get('r');
+    if (r) {
+      try {
+        const data = JSON.parse(decodeURIComponent(escape(atob(r))));
+        if (data.on && data.cr) {
+          setOnAnswers(data.on);
+          const ca = {};
+          LAYERS.forEach((_, i) => {
+            ca[i] = data.cr[i] || 10;
+          });
+          setCrisisAnswers(ca);
+          if (data.cl) setCustomLayer({
+            name: data.cl.n,
+            score: data.cl.s,
+            crisisScore: data.cl.c
+          });
+          setPhase("result");
+        }
+      } catch (e) {/* invalid URL param, ignore */}
+    }
+  }, []);
   const topRef = useRef(null);
   useEffect(() => {
     const id = "sos-style-v3";
@@ -2205,7 +2230,93 @@ window.App = function App() {
       className: "pf-west"
     }, "\"No duty is more urgent than that of returning thanks.\""), /*#__PURE__*/React.createElement("div", {
       className: "pf-attr"
-    }, "\u2014 Saint Ambrose, 4th century")), /*#__PURE__*/React.createElement("div", {
+    }, "\u2014 Saint Ambrose, 4th century")), (() => {
+      // onAnswers + crisisAnswers をコンパクトにエンコード
+      const shareData = {
+        on: onAnswers,
+        cr: LAYERS.map((_, i) => crisisAnswers[i] || 10),
+        cl: customLayer ? {
+          n: customLayer.name,
+          s: customLayer.score,
+          c: customLayer.crisisScore || 25
+        } : null
+      };
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(shareData))));
+      const shareUrl = window.location.href.split('?')[0].split('#')[0] + '?r=' + encoded;
+      return /*#__PURE__*/React.createElement("div", {
+        style: {
+          marginBottom: 24,
+          padding: "16px 18px",
+          background: "var(--s1)",
+          border: "1px solid var(--bd)",
+          fontSize: 12,
+          color: "var(--t2)",
+          lineHeight: 1.9
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          letterSpacing: ".2em",
+          color: "var(--gd)",
+          textTransform: "uppercase",
+          marginBottom: 8
+        }
+      }, "\u3053\u306E\u7D50\u679C\u3092\u4FDD\u5B58\u30FB\u30B7\u30A7\u30A2"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 11,
+          color: "var(--t3)",
+          marginBottom: 10
+        }
+      }, "\u3053\u306EURL\u3092\u4FDD\u5B58\u3059\u308B\u3068\u307E\u305F\u898B\u3089\u308C\u307E\u3059\u3002\u53CB\u4EBA\u306B\u9001\u3063\u3066\u30B7\u30A7\u30A2\u3082\u3067\u304D\u307E\u3059\u3002"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          color: "var(--t3)",
+          background: "var(--bg)",
+          padding: "8px 10px",
+          wordBreak: "break-all",
+          marginBottom: 10,
+          border: "1px solid var(--bd2)",
+          lineHeight: 1.6
+        }
+      }, shareUrl.length > 80 ? shareUrl.slice(0, 80) + '…' : shareUrl), /*#__PURE__*/React.createElement("button", {
+        onClick: () => {
+          navigator.clipboard?.writeText(shareUrl).then(() => {
+            const btn = document.getElementById('share-copy-btn');
+            if (btn) {
+              btn.textContent = 'コピーしました ✓';
+              setTimeout(() => {
+                btn.textContent = 'URLをコピー';
+              }, 2000);
+            }
+          }).catch(() => {
+            const ta = document.createElement('textarea');
+            ta.value = shareUrl;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            const btn = document.getElementById('share-copy-btn');
+            if (btn) {
+              btn.textContent = 'コピーしました ✓';
+              setTimeout(() => {
+                btn.textContent = 'URLをコピー';
+              }, 2000);
+            }
+          });
+        },
+        id: "share-copy-btn",
+        style: {
+          background: "transparent",
+          border: "1px solid var(--gd2)",
+          color: "var(--gd)",
+          fontSize: 11,
+          padding: "7px 20px",
+          cursor: "pointer",
+          letterSpacing: ".1em",
+          transition: "all .2s"
+        }
+      }, "URL\u3092\u30B3\u30D4\u30FC"));
+    })(), /*#__PURE__*/React.createElement("div", {
       style: {
         marginBottom: 28,
         padding: "18px 20px",
